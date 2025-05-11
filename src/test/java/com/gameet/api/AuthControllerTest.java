@@ -16,11 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
-
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,11 +45,8 @@ class AuthControllerTest {
     public void sign_up_success_test() throws Exception {
         // given
         SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username-123")
+                .email("a123@gmail.com")
                 .password("password")
-                .fullName("fullName")
-                .gender("F")
-                .age(23)
                 .build();
 
         // when & then
@@ -70,15 +63,12 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("[회원가입 성공 테스트] 회원가입 성공하면 사용자 기본 정보 반환")
+    @DisplayName("[회원가입 성공 테스트] 회원가입 성공하면 User PK, 이메일 반환")
     public void sign_up_success_returns_basic_user_info() throws Exception {
         // given
         SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username-123")
+                .email("b123@gmail.com")
                 .password("password")
-                .fullName("fullName")
-                .gender("F")
-                .age(23)
                 .build();
 
         // when & then
@@ -89,10 +79,7 @@ class AuthControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId").isNumber())
-                .andExpect(jsonPath("$.username").value(signUpRequest.username()))
-                .andExpect(jsonPath("$.fullName").value(signUpRequest.fullName()))
-                .andExpect(jsonPath("$.gender").value(signUpRequest.gender()))
-                .andExpect(jsonPath("$.age").value(signUpRequest.age()))
+                .andExpect(jsonPath("$.email").value(signUpRequest.email()))
                 .andDo(print());
     }
 
@@ -101,11 +88,8 @@ class AuthControllerTest {
     public void user_sign_up_should_assign_user_role() throws Exception {
         // given
         SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username-345")
+                .email("a345@gmail.com")
                 .password("password")
-                .fullName("fullName")
-                .gender("F")
-                .age(23)
                 .build();
 
         // when & then
@@ -117,10 +101,6 @@ class AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.role").value(Role.USER.name()))
                 .andDo(print());
-
-//        Optional<User> user = userRepository.findByUsername(signUpRequest.username());
-//        assertTrue(user.isPresent());
-//        assertEquals(Role.USER, user.get().getRole());
     }
 
     @Test
@@ -128,11 +108,8 @@ class AuthControllerTest {
     public void admin_sign_up_should_assign_admin_role() throws Exception{
         // given
         SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username-321")
+                .email("321@gmail.com")
                 .password("password")
-                .fullName("fullName")
-                .gender("F")
-                .age(23)
                 .build();
 
         // when & then
@@ -144,22 +121,15 @@ class AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.role").value(Role.ADMIN.name()))
                 .andDo(print());
-
-        Optional<User> user = userRepository.findByUsername(signUpRequest.username());
-        assertTrue(user.isPresent());
-        assertEquals(Role.ADMIN, user.get().getRole());
     }
 
     @Test
-    @DisplayName("[회원가입 유효성 테스트] 유저이름 필수")
-    public void sign_up_should_fail_when_username_is_blank() throws Exception {
+    @DisplayName("[회원가입 유효성 테스트] 잘못된 이메일 형식이면 회원가입 불가")
+    public void sign_up_should_fail_when_email_has_invalid_format() throws Exception {
         // given
         SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username(" ")
+                .email("use-143.com")
                 .password("password")
-                .fullName("fullName")
-                .gender("F")
-                .age(23)
                 .build();
 
         // when & then
@@ -169,53 +139,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("유저이름은 필수입니다."))
-                .andDo(print());
-    }
-
-    @Test
-    @DisplayName("[회원가입 유효성 테스트] 성별 F, M, N 만 가능")
-    public void sign_up_should_fail_when_gender_is_invalid() throws Exception {
-        // given
-        SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username-432")
-                .password("password")
-                .fullName("fullName")
-                .gender("A")
-                .age(23)
-                .build();
-
-        // when & then
-        mockMvc.perform(
-                post("/auth/sign-up/user")
-                        .content(objectMapper.writeValueAsString(signUpRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("성별은 F, M, N 중 하나여야 합니다."))
-                .andDo(print());
-    }
-
-    @Test
-    @DisplayName("[회원가입 유효성 테스트] 나이는 1살 이상만 가능")
-    public void sign_up_should_fail_when_birth_format_is_invalid() throws Exception {
-        // given
-        SignUpRequest signUpRequest = SignUpRequest.builder()
-                .username("username-143")
-                .password("password")
-                .fullName("fullName")
-                .gender("F")
-                .age(0)
-                .build();
-
-        // when & then
-        mockMvc.perform(
-                post("/auth/sign-up/user")
-                        .content(objectMapper.writeValueAsString(signUpRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("나이는 1살 이상이어야 합니다."))
+                .andExpect(content().string("유효한 이메일 형식이어야 합니다. 예: example@gmail.com"))
                 .andDo(print());
     }
 
@@ -225,17 +149,14 @@ class AuthControllerTest {
         // given
         User user = User.builder()
                 .role(Role.USER)
-                .username("username-4321")
+                .email("as123@gmail.com")
                 .password("password")
-                .fullName("fullName")
-                .gender('F')
-                .age(23)
                 .build();
 
         userRepository.save(user);
 
         LoginRequest loginRequest = LoginRequest.builder()
-                .username(user.getUsername())
+                .email(user.getEmail())
                 .password(user.getPassword())
                 .build();
 
@@ -253,11 +174,11 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("[로그인 유효성 테스트] 유저이름 필수")
-    public void login_should_fail_when_username_is_blank() throws Exception {
+    @DisplayName("[로그인 유효성 테스트] 이메일 필수")
+    public void login_should_fail_when_email_is_blank() throws Exception {
         // given
         LoginRequest loginRequest = LoginRequest.builder()
-                .username("")
+                .email("")
                 .password("password")
                 .build();
 
@@ -268,7 +189,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("유저이름은 필수입니다."))
+                .andExpect(content().string("유효한 이메일 형식이어야 합니다. 예: example@gmail.com"))
                 .andDo(print());
     }
 
@@ -278,17 +199,14 @@ class AuthControllerTest {
         // given
         User user = User.builder()
                 .role(Role.USER)
-                .username("username-321")
+                .email("ab321@gmail.com")
                 .password("password")
-                .fullName("fullName")
-                .gender('F')
-                .age(23)
                 .build();
 
         userRepository.save(user);
 
         LoginRequest loginRequest = LoginRequest.builder()
-                .username(user.getUsername())
+                .email(user.getEmail())
                 .password(user.getPassword())
                 .build();
 
@@ -301,7 +219,6 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Authorization", notNullValue()))
                 .andExpect(cookie().exists("refresh_token"))
-                .andExpect(jsonPath("$.username").value(user.getUsername()))
                 .andDo(print())
                 .andReturn()
                 .getResponse()

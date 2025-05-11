@@ -7,7 +7,7 @@ import com.gameet.auth.jwt.JwtUtil;
 import com.gameet.auth.repository.TokenRepository;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
-import com.gameet.user.dto.UserBasicResponse;
+import com.gameet.user.dto.UserResponse;
 import com.gameet.user.entity.User;
 import com.gameet.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -27,9 +27,9 @@ public class AuthService {
     private final TokenRepository tokenRepository;
 
     @Transactional
-    public UserBasicResponse registerUser(SignUpRequest signUpRequest, Role role, HttpServletResponse httpServletResponse) {
-        if (userRepository.existsByUsername(signUpRequest.username())) {
-            throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
+    public UserResponse registerUser(SignUpRequest signUpRequest, Role role, HttpServletResponse httpServletResponse) {
+        if (userRepository.existsByEmail(signUpRequest.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         try {
@@ -37,21 +37,22 @@ public class AuthService {
             userRepository.save(user);
 
             issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
-            return UserBasicResponse.of(user);
+            return UserResponse.of(user);
         } catch (DataIntegrityViolationException e) {
-            throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
     }
 
     @Transactional
-    public UserBasicResponse login(LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
-        User user = userRepository.findByUsername(loginRequest.username())
+    public UserResponse login(LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
+        User user = userRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
         user.verifyPasswordMatching(loginRequest.password());
 
         issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
 
-        return UserBasicResponse.of(user);
+        return UserResponse.of(user);
     }
 
     private void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {

@@ -4,7 +4,7 @@ import com.gameet.auth.dto.LoginRequest;
 import com.gameet.auth.dto.SignUpRequest;
 import com.gameet.auth.enums.Role;
 import com.gameet.auth.service.AuthService;
-import com.gameet.user.dto.UserBasicResponse;
+import com.gameet.user.dto.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -25,19 +25,19 @@ public class AuthController {
 
     @PostMapping("/sign-up/user")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
-        UserBasicResponse response = authService.registerUser(signUpRequest, Role.USER, httpServletResponse);
+        UserResponse response = authService.registerUser(signUpRequest, Role.USER, httpServletResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/sign-up/admin")
     public ResponseEntity<?> registerAdmin(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
-        UserBasicResponse response = authService.registerUser(signUpRequest, Role.ADMIN, httpServletResponse);
+        UserResponse response = authService.registerUser(signUpRequest, Role.ADMIN, httpServletResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
-        UserBasicResponse response = authService.login(loginRequest, httpServletResponse);
+        UserResponse response = authService.login(loginRequest, httpServletResponse);
         return ResponseEntity.ok(response);
     }
 
