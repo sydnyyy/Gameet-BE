@@ -1,4 +1,4 @@
-package com.gameet.api;
+package com.gameet.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gameet.auth.dto.LoginRequest;
