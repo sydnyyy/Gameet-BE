@@ -78,7 +78,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.userId").isNumber())
+                .andExpect(jsonPath("$.user_id").isNumber())
                 .andExpect(jsonPath("$.email").value(signUpRequest.email()))
                 .andDo(print());
     }

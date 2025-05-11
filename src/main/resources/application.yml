@@ -22,6 +22,9 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
 jwt:
   issuer: ${JWT_ISSUER}
   secret_key: ${JWT_SECRET_KEY}
