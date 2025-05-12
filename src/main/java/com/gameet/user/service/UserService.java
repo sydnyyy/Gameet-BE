@@ -48,4 +48,8 @@ public class UserService {
         user.getUserProfile().update(userProfileUpdateRequest);
         return UserDetailsResponse.of(user);
     }
+
+    public Boolean isNicknameAvailable(String nickname) {
+        return !userProfileRepository.existsByNickname(nickname);
+    }
 }

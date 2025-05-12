@@ -32,4 +32,10 @@ public class UserController {
         UserDetailsResponse response = userService.updateUserProfile(userPrincipal.getUserId(), userProfileUpdateRequest);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/profile/nickname-available")
+    public ResponseEntity<Boolean> isNicknameAvailable(@RequestParam String nickname) {
+        Boolean isAvailable = userService.isNicknameAvailable(nickname);
+        return ResponseEntity.ok(isAvailable);
+    }
 }
