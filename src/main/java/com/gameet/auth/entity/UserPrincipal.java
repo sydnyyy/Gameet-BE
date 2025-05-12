@@ -3,6 +3,7 @@ package com.gameet.auth.entity;
 import com.gameet.auth.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Builder
 @AllArgsConstructor
+@Getter
 public class UserPrincipal implements UserDetails {
 
     private final Long userId;
