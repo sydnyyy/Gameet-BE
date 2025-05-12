@@ -30,6 +30,10 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.PUBLIC)
+    private UserProfile userProfile;
+
     public static User of(SignUpRequest request, Role role) {
         return User.builder()
                 .role(role)
