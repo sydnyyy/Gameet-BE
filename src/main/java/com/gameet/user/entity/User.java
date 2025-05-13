@@ -51,4 +51,8 @@ public class User extends BaseTimeEntity {
     public void promoteToUserRole() {
         this.role = Role.USER;
     }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

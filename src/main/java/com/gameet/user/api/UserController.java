@@ -1,6 +1,7 @@
 package com.gameet.user.api;
 
 import com.gameet.auth.entity.UserPrincipal;
+import com.gameet.user.dto.PasswordResetRequest;
 import com.gameet.user.dto.UserProfileUpdateRequest;
 import com.gameet.user.service.UserService;
 import com.gameet.user.dto.UserDetailsResponse;
@@ -42,5 +43,11 @@ public class UserController {
     public ResponseEntity<Boolean> isNicknameAvailable(@RequestParam String nickname) {
         Boolean isAvailable = userService.isNicknameAvailable(nickname);
         return ResponseEntity.ok(isAvailable);
+    }
+
+    @PostMapping("/password-reset")
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetRequest passwordResetRequest) {
+        userService.resetPassword(passwordResetRequest);
+        return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
     }
 }

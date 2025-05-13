@@ -3,11 +3,13 @@ package com.gameet.user.service;
 import com.gameet.auth.service.AuthService;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
+import com.gameet.user.dto.PasswordResetRequest;
 import com.gameet.user.dto.UserDetailsResponse;
 import com.gameet.user.dto.UserProfileRequest;
 import com.gameet.user.dto.UserProfileUpdateRequest;
 import com.gameet.user.entity.User;
 import com.gameet.user.entity.UserProfile;
+import com.gameet.user.repository.PasswordResetTokenRepository;
 import com.gameet.user.repository.UserProfileRepository;
 import com.gameet.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final AuthService authService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Transactional
     public UserDetailsResponse saveUserProfile(Long userId,
@@ -64,5 +67,25 @@ public class UserService {
 
     public Boolean isExistUserByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetRequest passwordResetRequest) {
+        String email = passwordResetRequest.email();
+        String passwordResetToken = passwordResetRequest.passwordResetToken();
+        String newPassword = passwordResetRequest.newPassword();
+
+        Boolean isValid = passwordResetTokenRepository.isPasswordResetTokenValid(email, passwordResetToken);
+        if (!isValid) {
+            throw new CustomException(ErrorCode.INVALID_OR_EXPIRED_PASSWORD_RESET_TOKEN);
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        user.updatePassword(newPassword);
+        userRepository.save(user);
+
+        passwordResetTokenRepository.deletePasswordResetToken(email);
     }
 }

@@ -15,6 +15,7 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
     ALREADY_EXISTS_USER_PROFILE(HttpStatus.BAD_REQUEST, "유저 프로필이 이미 존재합니다."),
     USER_PROFILE_NOT_FOUND(HttpStatus.BAD_REQUEST, "유저 프로필이 존재하지 않습니다. 기본 프로필을 생성해주세요."),
+    INVALID_OR_EXPIRED_PASSWORD_RESET_TOKEN(HttpStatus.UNAUTHORIZED, "비밀번호 재설정 토큰이 유효하지 않거나 만료되었습니다."),
 
     // JWT
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED,"유효하지 않은 토큰입니다."),
