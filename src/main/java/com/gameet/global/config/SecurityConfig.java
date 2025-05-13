@@ -3,6 +3,8 @@ package com.gameet.global.config;
 import com.gameet.auth.config.JwtAuthenticationFiler;
 import com.gameet.auth.jwt.JwtAuthenticationProvider;
 import com.gameet.auth.jwt.JwtUtil;
+import com.gameet.global.exception.CustomAccessDeniedHandler;
+import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +34,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(HttpMethod.POST, "/auth/sign-up/**", "/auth/login").permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFiler(), UsernamePasswordAuthenticationFilter.class)
