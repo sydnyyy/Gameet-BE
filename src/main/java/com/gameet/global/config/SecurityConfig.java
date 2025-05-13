@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/sign-up/**", "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/users/profile").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/email/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

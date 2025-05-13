@@ -61,4 +61,8 @@ public class UserService {
     public Boolean isNicknameAvailable(String nickname) {
         return !userProfileRepository.existsByNickname(nickname);
     }
+
+    public Boolean isExistUserByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }
