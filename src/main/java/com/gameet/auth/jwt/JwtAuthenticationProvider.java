@@ -38,6 +38,9 @@ public class JwtAuthenticationProvider {
         if (role == Role.ADMIN) {
             return Collections.singleton(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+        else if(role == Role.USER) {
+            return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_GUEST"));
     }
 }

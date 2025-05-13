@@ -55,7 +55,7 @@ public class AuthService {
         return UserResponse.of(user);
     }
 
-    private void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
+    public void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
         String accessToken = jwtUtil.generateAccessToken(userId, role);
         String refreshToken = jwtUtil.generateRefreshToken(userId, role);
         httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);

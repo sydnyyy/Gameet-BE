@@ -1,5 +1,6 @@
 package com.gameet.user.service;
 
+import com.gameet.auth.service.AuthService;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
 import com.gameet.user.dto.UserDetailsResponse;
@@ -9,6 +10,7 @@ import com.gameet.user.entity.User;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
 import com.gameet.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +21,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final AuthService authService;
 
     @Transactional
-    public UserDetailsResponse saveUserProfile(Long userId, UserProfileRequest userProfileRequest) {
+    public UserDetailsResponse saveUserProfile(Long userId,
+                                               UserProfileRequest userProfileRequest,
+                                               HttpServletResponse httpServletResponse) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
@@ -33,6 +38,10 @@ public class UserService {
         user.setUserProfile(userProfile);
 
         userProfileRepository.save(userProfile);
+
+        user.promoteToUserRole();
+        authService.issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
+
         return UserDetailsResponse.of(user);
     }
 

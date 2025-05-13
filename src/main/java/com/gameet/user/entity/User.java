@@ -47,4 +47,8 @@ public class User extends BaseTimeEntity {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
     }
+
+    public void promoteToUserRole() {
+        this.role = Role.USER;
+    }
 }

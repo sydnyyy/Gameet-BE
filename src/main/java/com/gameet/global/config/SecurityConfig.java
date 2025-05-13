@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(HttpMethod.POST, "/auth/sign-up/**", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/profile").hasRole("GUEST")
+                        .requestMatchers(HttpMethod.PUT, "/users/profile").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

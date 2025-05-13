@@ -5,10 +5,12 @@ import com.gameet.user.dto.UserProfileUpdateRequest;
 import com.gameet.user.service.UserService;
 import com.gameet.user.dto.UserDetailsResponse;
 import com.gameet.user.dto.UserProfileRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,13 +22,16 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/profile")
+    @PreAuthorize("hasRole('ROLE_GUEST')")
     public ResponseEntity<?> saveUserProfile(@RequestBody @Valid UserProfileRequest userProfileRequest,
-                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        UserDetailsResponse response = userService.saveUserProfile(userPrincipal.getUserId(), userProfileRequest);
+                                             @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                             HttpServletResponse httpServletResponse) {
+        UserDetailsResponse response = userService.saveUserProfile(userPrincipal.getUserId(), userProfileRequest, httpServletResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/profile")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserProfile(@RequestBody UserProfileUpdateRequest userProfileUpdateRequest,
                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
         UserDetailsResponse response = userService.updateUserProfile(userPrincipal.getUserId(), userProfileUpdateRequest);
