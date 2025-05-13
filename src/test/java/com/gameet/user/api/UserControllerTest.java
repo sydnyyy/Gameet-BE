@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -75,7 +76,7 @@ class UserControllerTest {
                 .isVoice(true)
                 .build();
 
-        String accessToken = TestJwtUtil.generateTestAccessToken(user.getUserId(), Role.USER);
+        String accessToken = TestJwtUtil.generateTestAccessToken(user.getUserId(), Role.GUEST);
 
         // when & then
         mockMvc.perform(
@@ -86,6 +87,7 @@ class UserControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.user_id").isNumber())
+                .andExpect(jsonPath("$.role").value(Role.USER.toString()))
                 .andExpect(jsonPath("$.email").value(user.getEmail()))
                 .andExpect(jsonPath("$.nickname").value(userProfileRequest.nickname()))
                 .andExpect(jsonPath("$.age").value(userProfileRequest.age()))
@@ -102,7 +104,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("[유저 프로필 실패 테스트] 유저 프로필이 존재하면 400 에러 발생")
+    @DisplayName("[유저 프로필 실패 테스트] 유저(ROLE=USER) 프로필 존재한 상태에서 재설정(POST)시 403 에러 발생")
     public void shouldReturn400_whenUserProfileAlreadyExists() throws Exception {
         // given
         User user = User.builder()
@@ -126,7 +128,8 @@ class UserControllerTest {
                 .isVoice(true)
                 .build();
 
-        userService.saveUserProfile(user.getUserId(), userProfileRequest);
+        MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+        userService.saveUserProfile(user.getUserId(), userProfileRequest, mockResponse);
 
         String testAccessToken = TestJwtUtil.generateTestAccessToken(user.getUserId(), Role.USER);
 
@@ -137,8 +140,10 @@ class UserControllerTest {
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("유저 프로필이 이미 존재합니다."))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("403 FORBIDDEN"))
+                .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
+                .andExpect(jsonPath("$.path").value("/users/profile"))
                 .andDo(print());
     }
 
@@ -167,7 +172,8 @@ class UserControllerTest {
                 .isVoice(true)
                 .build();
 
-        userService.saveUserProfile(user.getUserId(), userProfileRequest);
+        MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+        userService.saveUserProfile(user.getUserId(), userProfileRequest, mockResponse);
 
         UserProfileUpdateRequest userProfileUpdateRequest = UserProfileUpdateRequest.builder()
                 .showAge(false)
@@ -195,7 +201,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("[유저 프로필 실패 테스트] 기존 프로필이 없으면 400 에러 반환")
+    @DisplayName("[유저 프로필 실패 테스트] 기존 프로필이 없는 상태로 PUT 요청시 403 에러 반환")
     void updateUserProfile_whenProfileDoesNotExist_thenThrows400() throws Exception {
         // given
         User user = User.builder()
@@ -212,7 +218,7 @@ class UserControllerTest {
                 .platforms(List.of(GamePlatform.MOBILE))
                 .build();
 
-        String testAccessToken = TestJwtUtil.generateTestAccessToken(user.getUserId(), Role.USER);
+        String testAccessToken = TestJwtUtil.generateTestAccessToken(user.getUserId(), Role.GUEST);
 
         // when & then
         mockMvc.perform(
@@ -221,8 +227,10 @@ class UserControllerTest {
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("유저 프로필이 존재하지 않습니다. 기본 프로필을 생성해주세요."))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("403 FORBIDDEN"))
+                .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
+                .andExpect(jsonPath("$.path").value("/users/profile"))
                 .andDo(print());
     }
 }

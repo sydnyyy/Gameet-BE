@@ -84,7 +84,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("[회원가입 ROLE(USER) 테스트] /sign-up/user 로 요청 시 ROLE=USER")
+    @DisplayName("[회원가입 ROLE(GUEST) 테스트] /sign-up/user 로 요청 시 ROLE=GUEST")
     public void user_sign_up_should_assign_user_role() throws Exception {
         // given
         SignUpRequest signUpRequest = SignUpRequest.builder()
@@ -99,7 +99,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.role").value(Role.USER.name()))
+                .andExpect(jsonPath("$.role").value(Role.GUEST.toString()))
                 .andDo(print());
     }
 
