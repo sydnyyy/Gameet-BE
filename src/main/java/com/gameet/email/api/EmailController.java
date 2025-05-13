@@ -1,5 +1,6 @@
 package com.gameet.email.api;
 
+import com.gameet.email.dto.EmailVerificationResponse;
 import com.gameet.email.dto.SendEmailVerificationCodeRequest;
 import com.gameet.email.dto.VerifyEmailCodeRequest;
 import com.gameet.email.enums.EmailPurpose;
@@ -21,7 +22,7 @@ public class EmailController {
 
     @PostMapping("/sign-up/send-code")
     public ResponseEntity<?> sendSignUpCode(@RequestBody @Valid SendEmailVerificationCodeRequest sendEmailVerificationCodeRequest) {
-        emailService.sendSignupCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.SIGN_UP);
+        emailService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.SIGN_UP);
         return ResponseEntity.ok("회원가입 인증 코드 전송");
     }
 
@@ -33,13 +34,13 @@ public class EmailController {
 
     @PostMapping("/password-reset/send-code")
     public ResponseEntity<?> sendPasswordResetCode(@RequestBody @Valid SendEmailVerificationCodeRequest sendEmailVerificationCodeRequest) {
-        emailService.sendSignupCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.PASSWORD_RESET);
-        return ResponseEntity.ok("비밀번호 재설정 인증 코드 전송");
+        emailService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.PASSWORD_RESET);
+        return ResponseEntity.ok("비밀번호 재설정 코드 전송");
     }
 
     @PostMapping("/password-reset/verify-code")
     public ResponseEntity<?> verifyPasswordResetCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest) {
-        emailService.verifyEmailCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.PASSWORD_RESET);
-        return ResponseEntity.ok("인증 성공");
+        EmailVerificationResponse response = emailService.verifyEmailCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.PASSWORD_RESET);
+        return ResponseEntity.ok(response);
     }
 }
