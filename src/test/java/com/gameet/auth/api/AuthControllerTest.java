@@ -189,6 +189,26 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest())
+//                .andExpect(content().string("이메일은 필수입니다."))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[로그인 유효성 테스트] 이메일 형식 example@gmail.com")
+    public void shouldReturn400_WhenEmailFormatIsInvalid() throws Exception {
+        // given
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("examplegmail.com")
+                .password("password")
+                .build();
+
+        // when & then
+        mockMvc.perform(
+                post("/auth/login")
+                        .content(objectMapper.writeValueAsString(loginRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
                 .andExpect(content().string("유효한 이메일 형식이어야 합니다. 예: example@gmail.com"))
                 .andDo(print());
     }
