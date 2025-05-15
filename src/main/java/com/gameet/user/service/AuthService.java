@@ -108,6 +108,12 @@ public class AuthService {
             if (!userRepository.existsByEmail(toEmail)) {
                 throw new CustomException(ErrorCode.USER_NOT_FOUND_BY_EMAIL);
             }
+        } else if (emailPurpose == EmailPurpose.SIGN_UP) {
+            if (userRepository.existsByEmail(toEmail)) {
+                throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+            }
+        } else {
+            throw new CustomException(ErrorCode.INVALID_EMAIL_PURPOSE);
         }
 
         String verificationCode = generateRandomCode();
