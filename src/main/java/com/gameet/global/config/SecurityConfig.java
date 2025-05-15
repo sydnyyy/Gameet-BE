@@ -34,13 +34,10 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/sign-up/**", "/auth/login").permitAll()
+                        .requestMatchers(SWAGGER_PATTERNS).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/users/profile").hasRole("USER")
-                        .requestMatchers(HttpMethod.GET, "/users/profile/nickname-available").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/password-reset").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/email/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -55,4 +52,17 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFiler() {
         return new JwtAuthenticationFilter(jwtUtil, jwtAuthenticationProvider);
     }
+
+    private static final String[] SWAGGER_PATTERNS = {
+            "/swagger-ui/**",
+            "/actuator/**",
+            "/v3/api-docs/**",
+    };
+
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/api/users/auth/sign-up/**",
+            "/api/users/auth/login",
+            "/api/users/auth/password-reset/**",
+            "/api/users/profile/nickname-available",
+    };
 }
