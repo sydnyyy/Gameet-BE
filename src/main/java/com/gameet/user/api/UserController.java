@@ -20,10 +20,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Users", description = "유저 API")
+@Tag(name = "User Profile", description = "유저 프로필 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/users/profile")
 @Validated
 public class UserController {
 
@@ -35,7 +35,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패 or 닉네임 중복", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "403", description = "ROLE=GUEST 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
     })
-    @PostMapping("/profile")
+    @PostMapping
     @PreAuthorize("hasRole('ROLE_GUEST')")
     public ResponseEntity<?> saveUserProfile(@RequestBody @Valid UserProfileRequest userProfileRequest,
                                              @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -50,7 +50,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "403", description = "ROLE=USER 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
     })
-    @PutMapping("/profile")
+    @PutMapping
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserProfile(@RequestBody @Valid UserProfileUpdateRequest userProfileUpdateRequest,
                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -63,20 +63,9 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "닉네임 유니크 여부 결과 반환", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class)))
     })
-    @GetMapping("/profile/nickname-available")
+    @GetMapping("/nickname-available")
     public ResponseEntity<Boolean> isNicknameAvailable(@RequestParam @Size(min = 1, message = "닉네임은 1자 이상이어야 합니다.") String nickname) {
         Boolean isAvailable = userService.isNicknameAvailable(nickname);
         return ResponseEntity.ok(isAvailable);
-    }
-
-    @Operation(summary = "비밀번호 재설정")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "401", description = "비밀번호 재설정용 토큰 만료", content = @Content(schema = @Schema(implementation = String.class)))
-    })
-    @PostMapping("/password-reset")
-    public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetRequest passwordResetRequest) {
-        userService.resetPassword(passwordResetRequest);
-        return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
     }
 }
