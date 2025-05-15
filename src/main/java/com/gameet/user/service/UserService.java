@@ -64,10 +64,6 @@ public class UserService {
         return !userProfileRepository.existsByNickname(nickname);
     }
 
-    public Boolean isExistUserByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
     @Transactional
     public void resetPassword(PasswordResetRequest passwordResetRequest) {
         String email = passwordResetRequest.email();
