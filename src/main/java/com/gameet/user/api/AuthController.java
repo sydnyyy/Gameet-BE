@@ -8,7 +8,6 @@ import com.gameet.user.dto.response.EmailVerificationResponse;
 import com.gameet.user.dto.request.SendEmailVerificationCodeRequest;
 import com.gameet.user.dto.request.VerifyEmailCodeRequest;
 import com.gameet.common.enums.EmailPurpose;
-import com.gameet.common.service.EmailService;
 import com.gameet.user.dto.request.PasswordResetRequest;
 import com.gameet.user.dto.response.UserResponse;
 import com.gameet.user.service.UserService;
@@ -34,7 +33,6 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
-    private final EmailService emailService;
 
     @Operation(summary = "일반 사용자 회원가입")
     @ApiResponses({
@@ -60,7 +58,7 @@ public class AuthController {
     })
     @PostMapping("/sign-up/send-code")
     public ResponseEntity<?> sendSignUpCode(@RequestBody @Valid SendEmailVerificationCodeRequest sendEmailVerificationCodeRequest) {
-        emailService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.SIGN_UP);
+        authService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.SIGN_UP);
         return ResponseEntity.ok("회원가입 인증 코드 전송");
     }
 
@@ -72,7 +70,7 @@ public class AuthController {
     })
     @PostMapping("/sign-up/verify-code")
     public ResponseEntity<?> verifySignUpCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest) {
-        emailService.verifyEmailCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.SIGN_UP);
+        authService.verifyVerificationCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.SIGN_UP);
         return ResponseEntity.ok("인증 성공");
     }
 
@@ -117,7 +115,7 @@ public class AuthController {
     })
     @PostMapping("/password-reset/send-code")
     public ResponseEntity<?> sendPasswordResetCode(@RequestBody @Valid SendEmailVerificationCodeRequest sendEmailVerificationCodeRequest) {
-        emailService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.PASSWORD_RESET);
+        authService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.PASSWORD_RESET);
         return ResponseEntity.ok("비밀번호 재설정 코드 전송");
     }
 
@@ -129,7 +127,7 @@ public class AuthController {
     })
     @PostMapping("/password-reset/verify-code")
     public ResponseEntity<?> verifyPasswordResetCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest) {
-        EmailVerificationResponse response = emailService.verifyEmailCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.PASSWORD_RESET);
+        EmailVerificationResponse response = authService.verifyVerificationCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.PASSWORD_RESET);
         return ResponseEntity.ok(response);
     }
 }
