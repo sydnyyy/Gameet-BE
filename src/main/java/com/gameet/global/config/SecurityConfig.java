@@ -36,8 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(SWAGGER_PATTERNS).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/profile").hasRole("GUEST")
-                        .requestMatchers(HttpMethod.PUT, "/users/profile").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
