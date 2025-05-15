@@ -80,7 +80,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/users/profile")
+                post("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileRequest))
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +135,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/users/profile")
+                post("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileRequest))
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class UserControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("403 FORBIDDEN"))
                 .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
-                .andExpect(jsonPath("$.path").value("/users/profile"))
+                .andExpect(jsonPath("$.path").value("/api/users/profile"))
                 .andDo(print());
     }
 
@@ -185,7 +185,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                put("/users/profile")
+                put("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileUpdateRequest))
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                put("/users/profile")
+                put("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileUpdateRequest))
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -230,7 +230,7 @@ class UserControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("403 FORBIDDEN"))
                 .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
-                .andExpect(jsonPath("$.path").value("/users/profile"))
+                .andExpect(jsonPath("$.path").value("/api/users/profile"))
                 .andDo(print());
     }
 }

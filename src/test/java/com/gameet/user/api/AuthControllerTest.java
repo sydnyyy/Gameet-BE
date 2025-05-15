@@ -1,4 +1,4 @@
-package com.gameet.auth.api;
+package com.gameet.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gameet.user.dto.request.LoginRequest;
@@ -51,7 +51,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/sign-up/user")
+                post("/api/users/auth/sign-up/user")
                         .content(objectMapper.writeValueAsString(signUpRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -73,7 +73,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/sign-up/user")
+                post("/api/users/auth/sign-up/user")
                         .content(objectMapper.writeValueAsString(signUpRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -94,7 +94,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/sign-up/user")
+                post("/api/users/auth/sign-up/user")
                         .content(objectMapper.writeValueAsString(signUpRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -114,7 +114,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/sign-up/admin")
+                post("/api/users/auth/sign-up/admin")
                         .content(objectMapper.writeValueAsString(signUpRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -134,7 +134,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/sign-up/user")
+                post("/api/users/auth/sign-up/user")
                         .content(objectMapper.writeValueAsString(signUpRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -162,7 +162,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/login")
+                post("/api/users/auth/login")
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -184,7 +184,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/login")
+                post("/api/users/auth/login")
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -204,7 +204,7 @@ class AuthControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/auth/login")
+                post("/api/users/auth/login")
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -232,7 +232,7 @@ class AuthControllerTest {
 
         // when & then
         String accessToken = mockMvc.perform(
-                post("/auth/login")
+                post("/api/users/auth/login")
                         .content(objectMapper.writeValueAsString(loginRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -245,7 +245,7 @@ class AuthControllerTest {
                 .getHeader("Authorization");
 
         mockMvc.perform(
-                post("/auth/logout")
+                post("/api/users/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", accessToken)
                 )
