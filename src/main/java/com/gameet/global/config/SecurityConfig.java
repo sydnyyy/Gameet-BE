@@ -1,8 +1,8 @@
 package com.gameet.global.config;
 
-import com.gameet.auth.config.JwtAuthenticationFiler;
-import com.gameet.auth.jwt.JwtAuthenticationProvider;
-import com.gameet.auth.jwt.JwtUtil;
+import com.gameet.global.jwt.JwtAuthenticationFilter;
+import com.gameet.global.jwt.JwtAuthenticationProvider;
+import com.gameet.global.jwt.JwtUtil;
 import com.gameet.global.exception.CustomAccessDeniedHandler;
 import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    private JwtAuthenticationFiler jwtAuthenticationFiler() {
-        return new JwtAuthenticationFiler(jwtUtil, jwtAuthenticationProvider);
+    private JwtAuthenticationFilter jwtAuthenticationFiler() {
+        return new JwtAuthenticationFilter(jwtUtil, jwtAuthenticationProvider);
     }
 }

@@ -1,9 +1,9 @@
 package com.gameet.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gameet.auth.dto.LoginRequest;
-import com.gameet.auth.dto.SignUpRequest;
-import com.gameet.auth.enums.Role;
+import com.gameet.user.dto.request.LoginRequest;
+import com.gameet.user.dto.request.SignUpRequest;
+import com.gameet.user.enums.Role;
 import com.gameet.user.entity.User;
 import com.gameet.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;

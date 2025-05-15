@@ -1,6 +1,6 @@
 package com.gameet.user.entity;
 
-import com.gameet.global.enums.PreferredGenre;
+import com.gameet.common.enums.PreferredGenre;
 import jakarta.persistence.*;
 import lombok.*;
 

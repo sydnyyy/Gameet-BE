@@ -1,6 +1,6 @@
 package com.gameet.user.entity;
 
-import com.gameet.global.enums.GamePlatform;
+import com.gameet.common.enums.GamePlatform;
 import jakarta.persistence.*;
 import lombok.*;
 

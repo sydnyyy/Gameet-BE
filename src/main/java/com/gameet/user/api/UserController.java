@@ -1,7 +1,9 @@
 package com.gameet.user.api;
 
-import com.gameet.auth.entity.UserPrincipal;
-import com.gameet.user.dto.*;
+import com.gameet.global.dto.UserPrincipal;
+import com.gameet.user.dto.request.UserProfileRequest;
+import com.gameet.user.dto.request.UserProfileUpdateRequest;
+import com.gameet.user.dto.response.UserDetailsResponse;
 import com.gameet.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
