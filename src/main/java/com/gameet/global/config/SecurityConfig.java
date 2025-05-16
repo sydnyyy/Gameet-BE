@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/sign-up/**", "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/users/profile").hasRole("USER")
