@@ -1,0 +1,42 @@
+package com.gameet.global.config.websocket.handler;
+
+import com.gameet.auth.jwt.JwtAuthenticationProvider;
+import com.gameet.auth.jwt.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+
+import java.security.Principal;
+import java.util.Map;
+
+@Component
+@RequiredArgsConstructor
+public class WebSocketHandShackHandler extends DefaultHandshakeHandler {
+
+    private final JwtUtil jwtUtil;
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
+
+    @Override
+    protected Principal determineUser(@NotNull ServerHttpRequest request, @NotNull WebSocketHandler wsHandler, @NotNull Map<String, Object> attributes) {
+        String token = jwtUtil.getAccessTokenFromRequest(request);
+
+        if (token == null || token.isBlank() || !jwtUtil.validateToken(token)) {
+            return null;
+        }
+
+        Authentication authentication = jwtAuthenticationProvider.getAuthentication(token);
+
+        boolean hasRoleUser = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
+
+        if (!hasRoleUser) {
+            return null;
+        }
+
+        return authentication;
+    }
+}
