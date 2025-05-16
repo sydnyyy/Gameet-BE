@@ -1,7 +1,7 @@
 package com.gameet.global.config.websocket.handler;
 
-import com.gameet.auth.jwt.JwtAuthenticationProvider;
-import com.gameet.auth.jwt.JwtUtil;
+import com.gameet.global.jwt.JwtAuthenticationProvider;
+import com.gameet.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.server.ServerHttpRequest;
