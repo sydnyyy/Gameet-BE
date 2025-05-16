@@ -1,12 +1,18 @@
 package com.gameet.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gameet.common.enums.EmailPurpose;
 import com.gameet.user.dto.request.LoginRequest;
+import com.gameet.user.dto.request.PasswordResetRequest;
 import com.gameet.user.dto.request.SignUpRequest;
+import com.gameet.user.dto.request.VerifyEmailCodeRequest;
 import com.gameet.user.enums.Role;
 import com.gameet.user.entity.User;
+import com.gameet.user.repository.EmailVerificationCodeRepository;
 import com.gameet.user.repository.UserRepository;
+import com.gameet.user.service.AuthService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +40,9 @@ class AuthControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailVerificationCodeRepository emailVerificationCodeRepository;
 
     @AfterEach
     void tearDown() {
@@ -255,6 +264,104 @@ class AuthControllerTest {
                 .andExpect(cookie().exists("refresh_token"))
                 .andExpect(cookie().value("refresh_token", nullValue()))
                 .andExpect(cookie().maxAge("refresh_token", 0))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("[비밀번호 재설정 토큰 테스트] 비밀번호 재설정시 헤더에 Password-Reset-Token 필수")
+    public void shouldRequirePasswordResetTokenHeader_WhenResettingPassword() throws Exception {
+        User user = User.builder()
+                .role(Role.USER)
+                .email("abc123@gmail.com")
+                .password("password")
+                .build();
+
+        userRepository.save(user);
+
+        final String testVerificationCode = "testabc123";
+        emailVerificationCodeRepository.saveEmailVerificationCode(user.getEmail(), testVerificationCode, EmailPurpose.PASSWORD_RESET);
+
+        VerifyEmailCodeRequest verifyEmailCodeRequest = VerifyEmailCodeRequest.builder()
+                .email(user.getEmail())
+                .code(testVerificationCode)
+                .build();
+
+        String passwordResetToken = mockMvc.perform(
+                post("/api/users/auth/password-reset/verify-code")
+                        .content(objectMapper.writeValueAsString(verifyEmailCodeRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().string("인증 성공"))
+                .andDo(print())
+                .andReturn()
+                .getResponse()
+                .getHeader("Password-Reset-Token");
+
+        Assertions.assertNotNull(passwordResetToken);
+
+        PasswordResetRequest passwordResetRequest = PasswordResetRequest.builder()
+                .email(user.getEmail())
+                .newPassword("newPassword")
+                .build();
+
+        mockMvc.perform(
+                post("/api/users/auth/password-reset")
+                        .content(objectMapper.writeValueAsString(passwordResetRequest))
+                        .header(AuthService.HEADER_PASSWORD_RESET_TOKEN, passwordResetToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().string("비밀번호가 재설정되었습니다."))
+                .andDo(print());
+
+        user = userRepository.findByEmail(user.getEmail()).get();
+        Assertions.assertEquals(passwordResetRequest.newPassword(), user.getPassword());
+    }
+
+    @Test
+    @DisplayName("[비밀번호 재설정 토큰 테스트] 비밀번호 재설정시 헤더에 Password-Reset-Token 없으면 400 에러 반환")
+    public void shouldReturn400WhenPasswordResetTokenHeaderIsMissing() throws Exception {
+        User user = User.builder()
+                .role(Role.USER)
+                .email("abc123@gmail.com")
+                .password("password")
+                .build();
+
+        userRepository.save(user);
+
+        final String testVerificationCode = "testabc123";
+        emailVerificationCodeRepository.saveEmailVerificationCode(user.getEmail(), testVerificationCode, EmailPurpose.PASSWORD_RESET);
+
+        VerifyEmailCodeRequest verifyEmailCodeRequest = VerifyEmailCodeRequest.builder()
+                .email(user.getEmail())
+                .code(testVerificationCode)
+                .build();
+
+        String passwordResetToken = mockMvc.perform(
+                        post("/api/users/auth/password-reset/verify-code")
+                                .content(objectMapper.writeValueAsString(verifyEmailCodeRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().string("인증 성공"))
+                .andDo(print())
+                .andReturn()
+                .getResponse()
+                .getHeader("Password-Reset-Token");
+
+        PasswordResetRequest passwordResetRequest = PasswordResetRequest.builder()
+                .email(user.getEmail())
+                .newPassword("newPassword")
+                .build();
+
+        mockMvc.perform(
+                        post("/api/users/auth/password-reset")
+                                .content(objectMapper.writeValueAsString(passwordResetRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("비밀번호 재설정 토큰은 필수입니다."))
                 .andDo(print());
     }
 }
