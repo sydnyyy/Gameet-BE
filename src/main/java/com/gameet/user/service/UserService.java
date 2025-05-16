@@ -65,9 +65,8 @@ public class UserService {
     }
 
     @Transactional
-    public void resetPassword(PasswordResetRequest passwordResetRequest) {
+    public void resetPassword(PasswordResetRequest passwordResetRequest, String passwordResetToken) {
         String email = passwordResetRequest.email();
-        String passwordResetToken = passwordResetRequest.passwordResetToken();
         String newPassword = passwordResetRequest.newPassword();
 
         Boolean isValid = passwordResetTokenRepository.isPasswordResetTokenValid(email, passwordResetToken);

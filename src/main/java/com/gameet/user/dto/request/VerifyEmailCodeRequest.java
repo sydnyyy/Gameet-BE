@@ -2,7 +2,9 @@ package com.gameet.user.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 
+@Builder
 public record VerifyEmailCodeRequest (
 
         @NotBlank(message = "이메일은 필수입니다.")

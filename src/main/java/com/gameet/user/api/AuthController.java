@@ -1,10 +1,11 @@
 package com.gameet.user.api;
 
+import com.gameet.global.exception.CustomException;
+import com.gameet.global.exception.ErrorCode;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
 import com.gameet.user.enums.Role;
 import com.gameet.user.service.AuthService;
-import com.gameet.user.dto.response.EmailVerificationResponse;
 import com.gameet.user.dto.request.SendEmailVerificationCodeRequest;
 import com.gameet.user.dto.request.VerifyEmailCodeRequest;
 import com.gameet.common.enums.EmailPurpose;
@@ -69,8 +70,11 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "인증 코드 불일치", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @PostMapping("/sign-up/verify-code")
-    public ResponseEntity<?> verifySignUpCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest) {
-        authService.verifyVerificationCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.SIGN_UP);
+    public ResponseEntity<?> verifySignUpCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest,
+                                              HttpServletResponse httpServletResponse) {
+        authService.verifyVerificationCode(
+                verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(),
+                EmailPurpose.SIGN_UP, httpServletResponse);
         return ResponseEntity.ok("인증 성공");
     }
 
@@ -102,8 +106,13 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "비밀번호 재설정용 토큰 만료", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @PostMapping("/password-reset")
-    public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetRequest passwordResetRequest) {
-        userService.resetPassword(passwordResetRequest);
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetRequest passwordResetRequest, HttpServletRequest httpServletRequest) {
+        String passwordResetToken = httpServletRequest.getHeader(AuthService.HEADER_PASSWORD_RESET_TOKEN);
+        if (passwordResetToken == null) {
+            throw new CustomException(ErrorCode.PASSWORD_RESET_TOKEN_REQUIRED);
+        }
+
+        userService.resetPassword(passwordResetRequest, passwordResetToken);
         return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
     }
 
@@ -121,13 +130,16 @@ public class AuthController {
 
     @Operation(summary = "비밀번호 재설성 인증 코드 검증")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "비밀번호 재설성 인증 코드 일치", content = @Content(schema = @Schema(implementation = EmailVerificationResponse.class))),
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설성 인증 코드 일치", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "인증 코드 불일치", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @PostMapping("/password-reset/verify-code")
-    public ResponseEntity<?> verifyPasswordResetCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest) {
-        EmailVerificationResponse response = authService.verifyVerificationCode(verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(), EmailPurpose.PASSWORD_RESET);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> verifyPasswordResetCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest,
+                                                     HttpServletResponse httpServletResponse) {
+        authService.verifyVerificationCode(
+                verifyEmailCodeRequest.email(), verifyEmailCodeRequest.code(),
+                EmailPurpose.PASSWORD_RESET, httpServletResponse);
+        return ResponseEntity.ok("인증 성공");
     }
 }

@@ -4,7 +4,6 @@ import com.gameet.common.enums.EmailPurpose;
 import com.gameet.common.service.EmailService;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
-import com.gameet.user.dto.response.EmailVerificationResponse;
 import com.gameet.user.enums.Role;
 import com.gameet.global.jwt.JwtUtil;
 import com.gameet.user.repository.EmailVerificationCodeRepository;
@@ -31,6 +30,7 @@ import java.security.SecureRandom;
 @Slf4j
 public class AuthService {
 
+    public static final String HEADER_PASSWORD_RESET_TOKEN = "Password-Reset-Token";
     private final JwtUtil jwtUtil;
 
     private final EmailService emailService;
@@ -143,7 +143,8 @@ public class AuthService {
         emailVerificationCodeRepository.saveEmailVerificationCode(email, code, emailPurpose);
     }
 
-    public <T> T verifyVerificationCode(String email, String code, EmailPurpose emailPurpose) {
+    public void verifyVerificationCode(String email, String code, EmailPurpose emailPurpose,
+                                       HttpServletResponse httpServletResponse) {
         Boolean isValid = emailVerificationCodeRepository.isValidEmailVerificationCode(email, code, emailPurpose);
         if (!isValid) {
             throw new CustomException(ErrorCode.EMAIL_VERIFICATION_FAILED);
@@ -153,11 +154,8 @@ public class AuthService {
 
             if (emailPurpose == EmailPurpose.PASSWORD_RESET) {
                 String passwordResetToken = issuePasswordResetToken(email);
-                return (T) EmailVerificationResponse.of(email, passwordResetToken);
-            } else if (emailPurpose == EmailPurpose.SIGN_UP) {
-                return null;
+                httpServletResponse.setHeader(HEADER_PASSWORD_RESET_TOKEN, passwordResetToken);
             }
-            return null;
         }
     }
 
