@@ -1,8 +1,8 @@
 package com.gameet.global.config;
 
-import com.gameet.auth.config.JwtAuthenticationFiler;
-import com.gameet.auth.jwt.JwtAuthenticationProvider;
-import com.gameet.auth.jwt.JwtUtil;
+import com.gameet.global.jwt.JwtAuthenticationFilter;
+import com.gameet.global.jwt.JwtAuthenticationProvider;
+import com.gameet.global.jwt.JwtUtil;
 import com.gameet.global.exception.CustomAccessDeniedHandler;
 import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +34,10 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/sign-up/**", "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/profile").hasRole("GUEST")
-                        .requestMatchers(HttpMethod.PUT, "/users/profile").hasRole("USER")
-                        .requestMatchers(HttpMethod.GET, "/users/profile/nickname-available").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/password-reset").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/email/auth/**").permitAll()
+                        .requestMatchers(SWAGGER_PATTERNS).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -52,7 +49,20 @@ public class SecurityConfig {
                 .build();
     }
 
-    private JwtAuthenticationFiler jwtAuthenticationFiler() {
-        return new JwtAuthenticationFiler(jwtUtil, jwtAuthenticationProvider);
+    private JwtAuthenticationFilter jwtAuthenticationFiler() {
+        return new JwtAuthenticationFilter(jwtUtil, jwtAuthenticationProvider);
     }
+
+    private static final String[] SWAGGER_PATTERNS = {
+            "/swagger-ui/**",
+            "/actuator/**",
+            "/v3/api-docs/**",
+    };
+
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/api/users/auth/sign-up/**",
+            "/api/users/auth/login",
+            "/api/users/auth/password-reset/**",
+            "/api/users/profile/nickname-available",
+    };
 }

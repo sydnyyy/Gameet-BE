@@ -1,6 +1,6 @@
 package com.gameet.global;
 
-import com.gameet.auth.enums.Role;
+import com.gameet.user.enums.Role;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;

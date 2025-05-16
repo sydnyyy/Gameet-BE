@@ -27,7 +27,8 @@ public enum ErrorCode {
     // email
     EMAIL_VERIFICATION_FAILED(HttpStatus.UNAUTHORIZED, "이메일 인증에 실패했습니다."),
     INVALID_EMAIL_PURPOSE(HttpStatus.BAD_REQUEST, "지원하지 않는 이메일 목적입니다."),
-    EMAIL_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.")
+    EMAIL_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요."),
+    PASSWORD_RESET_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "비밀번호 재설정 토큰은 필수입니다.")
     ;
 
     private final HttpStatus status;

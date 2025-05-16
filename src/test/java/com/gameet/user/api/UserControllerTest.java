@@ -2,14 +2,14 @@ package com.gameet.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gameet.global.TestJwtUtil;
-import com.gameet.auth.enums.Role;
-import com.gameet.global.enums.GamePlatform;
-import com.gameet.global.enums.GameSkillLevel;
-import com.gameet.global.enums.PlayStyle;
-import com.gameet.global.enums.PreferredGenre;
-import com.gameet.user.dto.UserProfileUpdateRequest;
+import com.gameet.user.enums.Role;
+import com.gameet.common.enums.GamePlatform;
+import com.gameet.common.enums.GameSkillLevel;
+import com.gameet.common.enums.PlayStyle;
+import com.gameet.common.enums.PreferredGenre;
+import com.gameet.user.dto.request.UserProfileUpdateRequest;
 import com.gameet.user.service.UserService;
-import com.gameet.user.dto.UserProfileRequest;
+import com.gameet.user.dto.request.UserProfileRequest;
 import com.gameet.user.entity.User;
 import com.gameet.user.repository.UserRepository;
 import org.junit.jupiter.api.*;
@@ -80,7 +80,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/users/profile")
+                post("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileRequest))
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +135,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                post("/users/profile")
+                post("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileRequest))
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class UserControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("403 FORBIDDEN"))
                 .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
-                .andExpect(jsonPath("$.path").value("/users/profile"))
+                .andExpect(jsonPath("$.path").value("/api/users/profile"))
                 .andDo(print());
     }
 
@@ -185,7 +185,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                put("/users/profile")
+                put("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileUpdateRequest))
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ class UserControllerTest {
 
         // when & then
         mockMvc.perform(
-                put("/users/profile")
+                put("/api/users/profile")
                         .content(objectMapper.writeValueAsString(userProfileUpdateRequest))
                         .header("Authorization", "Bearer " + testAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -230,7 +230,7 @@ class UserControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("403 FORBIDDEN"))
                 .andExpect(jsonPath("$.message").value("접근 권한이 없습니다."))
-                .andExpect(jsonPath("$.path").value("/users/profile"))
+                .andExpect(jsonPath("$.path").value("/api/users/profile"))
                 .andDo(print());
     }
 }

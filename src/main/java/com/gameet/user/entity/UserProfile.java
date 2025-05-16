@@ -1,10 +1,10 @@
 package com.gameet.user.entity;
 
-import com.gameet.global.entity.BaseTimeEntity;
-import com.gameet.global.enums.GameSkillLevel;
-import com.gameet.global.enums.PlayStyle;
-import com.gameet.user.dto.UserProfileRequest;
-import com.gameet.user.dto.UserProfileUpdateRequest;
+import com.gameet.common.entity.BaseTimeEntity;
+import com.gameet.common.enums.GameSkillLevel;
+import com.gameet.common.enums.PlayStyle;
+import com.gameet.user.dto.request.UserProfileRequest;
+import com.gameet.user.dto.request.UserProfileUpdateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.*;

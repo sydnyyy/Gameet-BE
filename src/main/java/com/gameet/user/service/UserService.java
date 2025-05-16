@@ -1,12 +1,11 @@
 package com.gameet.user.service;
 
-import com.gameet.auth.service.AuthService;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
-import com.gameet.user.dto.PasswordResetRequest;
-import com.gameet.user.dto.UserDetailsResponse;
-import com.gameet.user.dto.UserProfileRequest;
-import com.gameet.user.dto.UserProfileUpdateRequest;
+import com.gameet.user.dto.request.PasswordResetRequest;
+import com.gameet.user.dto.response.UserDetailsResponse;
+import com.gameet.user.dto.request.UserProfileRequest;
+import com.gameet.user.dto.request.UserProfileUpdateRequest;
 import com.gameet.user.entity.User;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.PasswordResetTokenRepository;
@@ -65,14 +64,9 @@ public class UserService {
         return !userProfileRepository.existsByNickname(nickname);
     }
 
-    public Boolean isExistUserByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
     @Transactional
-    public void resetPassword(PasswordResetRequest passwordResetRequest) {
+    public void resetPassword(PasswordResetRequest passwordResetRequest, String passwordResetToken) {
         String email = passwordResetRequest.email();
-        String passwordResetToken = passwordResetRequest.passwordResetToken();
         String newPassword = passwordResetRequest.newPassword();
 
         Boolean isValid = passwordResetTokenRepository.isPasswordResetTokenValid(email, passwordResetToken);

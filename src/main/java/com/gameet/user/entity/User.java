@@ -1,8 +1,8 @@
 package com.gameet.user.entity;
 
-import com.gameet.auth.dto.SignUpRequest;
-import com.gameet.auth.enums.Role;
-import com.gameet.global.entity.BaseTimeEntity;
+import com.gameet.user.dto.request.SignUpRequest;
+import com.gameet.user.enums.Role;
+import com.gameet.common.entity.BaseTimeEntity;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
 import jakarta.persistence.*;
