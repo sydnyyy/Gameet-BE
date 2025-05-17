@@ -30,6 +30,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns(ALLOWED_ORIGINS)
                 .setHandshakeHandler(webSocketHandShackHandler)
                 .withSockJS();
+
+        registry.addEndpoint(ENDPOINT)
+                .setAllowedOriginPatterns(ALLOWED_ORIGINS)
+                .setHandshakeHandler(webSocketHandShackHandler);
     }
 
     @Override
