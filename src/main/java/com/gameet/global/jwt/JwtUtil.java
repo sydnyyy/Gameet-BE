@@ -7,9 +7,16 @@ import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +65,32 @@ public class JwtUtil {
         }
         return null;
     }
+
+    public String getAccessTokenFromAccessor(StompHeaderAccessor stompHeaderAccessor) {
+        String header = stompHeaderAccessor.getFirstNativeHeader(HEADER_AUTHORIZATION);
+        if (header != null && header.startsWith(TOKEN_PREFIX)) {
+            return header.split(" ", 2)[1];
+        }
+        return null;
+    }
+
+    public String getAccessTokenFromRequest(ServerHttpRequest request) {
+        List<String> queryParams = request.getURI().getQuery() != null ?
+                Arrays.asList(request.getURI().getQuery().split("&")) : Collections.emptyList();
+
+        for (String param : queryParams) {
+            String[] kv = param.split("=");
+            if (kv.length == 2 && kv[0].equalsIgnoreCase(JwtUtil.HEADER_AUTHORIZATION)) {
+                String header = URLDecoder.decode(kv[1], StandardCharsets.UTF_8);
+                if (header != null && header.startsWith(JwtUtil.TOKEN_PREFIX)) {
+                    return header.split(" ", 2)[1];
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     public boolean validateToken(String token) {
         try {

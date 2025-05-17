@@ -60,6 +60,7 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            "/ws/**",
             "/api/users/auth/sign-up/**",
             "/api/users/auth/login",
             "/api/users/auth/password-reset/**",
