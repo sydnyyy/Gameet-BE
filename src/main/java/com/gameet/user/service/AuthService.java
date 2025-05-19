@@ -99,6 +99,14 @@ public class AuthService {
         httpServletResponse.addCookie(cookie);
 
         refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+
+        String websocketToken = jwtUtil.generateWebSocketToken(userId, role);
+
+        cookie = new Cookie(JwtUtil.COOKIE_WEBSOCKET_TOKEN_NAME, websocketToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(20);
+        httpServletResponse.addCookie(cookie);
     }
 
     public void reissueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
