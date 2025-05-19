@@ -24,7 +24,7 @@ public class JwtUtil {
 
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15;
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7;
-    private static final long WEBSOCKET_TOKEN_EXPIRATION = 1000 * 20;
+    private static final long WEBSOCKET_TOKEN_EXPIRATION = 1000 * 10;
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
     public final static String COOKIE_REFRESH_TOKEN_NAME = "refresh_token";
