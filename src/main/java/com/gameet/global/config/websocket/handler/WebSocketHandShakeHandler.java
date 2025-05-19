@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class WebSocketHandShackHandler extends DefaultHandshakeHandler {
+public class WebSocketHandShakeHandler extends DefaultHandshakeHandler {
 
     private final JwtUtil jwtUtil;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
