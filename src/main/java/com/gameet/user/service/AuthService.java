@@ -50,8 +50,9 @@ public class AuthService {
             User user = User.of(signUpRequest, role);
             userRepository.save(user);
 
+            String accessToken = jwtUtil.generateAccessToken(user.getUserId(), user.getRole());
             issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
-            return UserResponse.of(user);
+            return UserResponse.of(user, accessToken);
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
@@ -64,15 +65,14 @@ public class AuthService {
 
         user.verifyPasswordMatching(loginRequest.password());
 
+        String accessToken = jwtUtil.generateAccessToken(user.getUserId(), user.getRole());
         issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
 
-        return UserResponse.of(user);
+        return UserResponse.of(user, accessToken);
     }
 
     public void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
-        String accessToken = jwtUtil.generateAccessToken(userId, role);
         String refreshToken = jwtUtil.generateRefreshToken(userId, role);
-        httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
 
         Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
         cookie.setHttpOnly(true);
