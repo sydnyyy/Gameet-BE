@@ -9,16 +9,14 @@ public record UserResponse (
 
         Long userId,
         Role role,
-        String email,
-        String accessToken
+        String email
 ) {
 
-    public static UserResponse of(User user, String accessToken) {
+    public static UserResponse of(User user) {
         return UserResponse.builder()
                 .userId(user.getUserId())
                 .role(user.getRole())
                 .email(user.getEmail())
-                .accessToken(accessToken)
                 .build();
     }
 }
