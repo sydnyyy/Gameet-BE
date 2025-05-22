@@ -143,6 +143,11 @@ public class AuthController {
         return ResponseEntity.ok("인증 성공");
     }
 
+    @Operation(summary = "액세스 토큰 재발급")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "액세스 토큰 재발급 성공", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "401", description = "리프레시 토큰 만료 or 유효하지 않은 상태", content = @Content(schema = @Schema(implementation = String.class)))
+    })
     @PostMapping("/token/refresh")
     public ResponseEntity<?> reissueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         authService.reissueAccessToken(httpServletRequest, httpServletResponse);
