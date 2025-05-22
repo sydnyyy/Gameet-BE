@@ -22,6 +22,7 @@ public enum ErrorCode {
     USER_ID_REQUIRED(HttpStatus.BAD_REQUEST, "토큰 생성 시 userId 값은 필수입니다."),
     ROLE_REQUIRED(HttpStatus.BAD_REQUEST, "토큰 생성 시 role 값은 필수입니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
     JWT_PROCESSING_FAILED(HttpStatus.BAD_REQUEST, "JWT 처리 중 오류가 발생했습니다."),
 
     // email

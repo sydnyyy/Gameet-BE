@@ -10,4 +10,13 @@ public enum Role {
     ADMIN("ADMIN");
 
     private final String description;
+
+    public static Role from(String value) {
+        for (Role role : values()) {
+            if (role.name().equalsIgnoreCase(value)) {
+                return role;
+            }
+        }
+        throw new IllegalArgumentException("Unknown role: " + value);
+    }
 }

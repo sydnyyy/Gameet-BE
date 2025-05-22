@@ -65,5 +65,7 @@ public class SecurityConfig {
             "/api/users/auth/login",
             "/api/users/auth/password-reset/**",
             "/api/users/profile/nickname-available",
+            "/api/users/auth/token/refresh",
+            "/error"
     };
 }

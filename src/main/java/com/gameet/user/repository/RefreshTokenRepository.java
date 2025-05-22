@@ -21,4 +21,10 @@ public class RefreshTokenRepository {
     public void deleteRefreshTokenByUserId(Long userId) {
         redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
     }
+
+    public boolean isValidRefreshToken(Long userId, String refreshTokenFromRequest) {
+        String storedToken = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + userId);
+        return storedToken != null && storedToken.equals(refreshTokenFromRequest);
+    }
+
 }

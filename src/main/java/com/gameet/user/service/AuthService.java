@@ -50,7 +50,7 @@ public class AuthService {
             User user = User.of(signUpRequest, role);
             userRepository.save(user);
 
-            issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
+            issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), false, httpServletResponse);
             return UserResponse.of(user);
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -64,17 +64,33 @@ public class AuthService {
 
         user.verifyPasswordMatching(loginRequest.password());
 
-        issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
+        issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), loginRequest.rememberMe(), httpServletResponse);
 
         return UserResponse.of(user);
     }
 
-    public void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
+    public void issueTokenAndAttachToResponse(Long userId, Role role, Boolean rememberMe, HttpServletResponse httpServletResponse) {
         String accessToken = jwtUtil.generateAccessToken(userId, role);
-        String refreshToken = jwtUtil.generateRefreshToken(userId, role);
-
         httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
 
+        if (rememberMe != null && rememberMe) {
+            generateRefreshToken(userId, role, httpServletResponse);
+        }
+    }
+
+    public void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String accessToken = jwtUtil.generateAccessToken(userId, role);
+        httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
+
+
+        String refreshToken = jwtUtil.getRefreshToken(httpServletRequest);
+        if (refreshToken != null) {
+            generateRefreshToken(userId, role, httpServletResponse);
+        }
+    }
+
+    private void generateRefreshToken(Long userId, Role role, HttpServletResponse httpServletResponse) {
+        String refreshToken = jwtUtil.generateRefreshToken(userId, role);
         Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
@@ -83,6 +99,24 @@ public class AuthService {
         httpServletResponse.addCookie(cookie);
 
         refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+    }
+
+    public void reissueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String refreshToken = jwtUtil.getRefreshToken(httpServletRequest);
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+        Role role = jwtUtil.getRoleFromToken(refreshToken);
+
+        boolean isValid = refreshTokenRepository.isValidRefreshToken(userId, refreshToken);
+        if (!isValid) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(userId, role);
+        httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + newAccessToken);
     }
 
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {

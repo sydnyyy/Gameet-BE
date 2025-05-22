@@ -43,11 +43,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+    public ResponseEntity<String> handleMessageNotReadable(HttpMessageNotReadableException ex) {
         return ResponseEntity
                 .badRequest()
-                .body(Map.of(
-                        "error", "Bad Request",
-                        "message", ex.getMessage()));
+                .body(ex.getMessage());
     }
 }

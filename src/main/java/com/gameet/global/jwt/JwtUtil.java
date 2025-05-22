@@ -112,6 +112,18 @@ public class JwtUtil {
         }
     }
 
+    public Role getRoleFromToken(String token) {
+        try {
+            Claims claims = getClaims(token);
+            String roleString = claims.get("role", String.class);
+            return Role.from(roleString);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        } catch (JwtException e) {
+            throw new CustomException(ErrorCode.JWT_PROCESSING_FAILED);
+        }
+    }
+
     public Claims getClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(jwtProperties.getSecretKey())
