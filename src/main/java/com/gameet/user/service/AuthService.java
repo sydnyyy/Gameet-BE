@@ -74,15 +74,7 @@ public class AuthService {
         httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
 
         if (rememberMe != null && rememberMe) {
-            String refreshToken = jwtUtil.generateRefreshToken(userId, role);
-            Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24 * 7);
-            httpServletResponse.addCookie(cookie);
-
-            refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+            generateRefreshToken(userId, role, httpServletResponse);
         }
     }
 
@@ -91,31 +83,22 @@ public class AuthService {
         httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
 
 
-        if (hasRefreshTokenCookie(httpServletRequest)) {
-            String refreshToken = jwtUtil.generateRefreshToken(userId, role);
-            Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24 * 7);
-            httpServletResponse.addCookie(cookie);
-
-            refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+        String refreshToken = jwtUtil.getRefreshToken(httpServletRequest);
+        if (refreshToken != null) {
+            generateRefreshToken(userId, role, httpServletResponse);
         }
     }
 
-    private Boolean hasRefreshTokenCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return false;
-        }
+    private void generateRefreshToken(Long userId, Role role, HttpServletResponse httpServletResponse) {
+        String refreshToken = jwtUtil.generateRefreshToken(userId, role);
+        Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 7);
+        httpServletResponse.addCookie(cookie);
 
-        for (Cookie cookie : cookies) {
-            if (JwtUtil.COOKIE_REFRESH_TOKEN_NAME.equals(cookie.getName())) {
-                return true;
-            }
-        }
-        return false;
+        refreshTokenRepository.saveRefreshToken(userId, refreshToken);
     }
 
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
