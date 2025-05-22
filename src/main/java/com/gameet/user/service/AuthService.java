@@ -50,7 +50,7 @@ public class AuthService {
             User user = User.of(signUpRequest, role);
             userRepository.save(user);
 
-            issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
+            issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), false, httpServletResponse);
             return UserResponse.of(user);
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -64,25 +64,58 @@ public class AuthService {
 
         user.verifyPasswordMatching(loginRequest.password());
 
-        issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
+        issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), loginRequest.rememberMe(), httpServletResponse);
 
         return UserResponse.of(user);
     }
 
-    public void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
+    public void issueTokenAndAttachToResponse(Long userId, Role role, Boolean rememberMe, HttpServletResponse httpServletResponse) {
         String accessToken = jwtUtil.generateAccessToken(userId, role);
-        String refreshToken = jwtUtil.generateRefreshToken(userId, role);
-
         httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
 
-        Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 7);
-        httpServletResponse.addCookie(cookie);
+        if (rememberMe != null && rememberMe) {
+            String refreshToken = jwtUtil.generateRefreshToken(userId, role);
+            Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60 * 24 * 7);
+            httpServletResponse.addCookie(cookie);
 
-        refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+            refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+        }
+    }
+
+    public void issueTokenAndAttachToResponse(Long userId, Role role, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String accessToken = jwtUtil.generateAccessToken(userId, role);
+        httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + accessToken);
+
+
+        if (hasRefreshTokenCookie(httpServletRequest)) {
+            String refreshToken = jwtUtil.generateRefreshToken(userId, role);
+            Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60 * 24 * 7);
+            httpServletResponse.addCookie(cookie);
+
+            refreshTokenRepository.saveRefreshToken(userId, refreshToken);
+        }
+    }
+
+    private Boolean hasRefreshTokenCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return false;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (JwtUtil.COOKIE_REFRESH_TOKEN_NAME.equals(cookie.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {

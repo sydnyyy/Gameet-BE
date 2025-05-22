@@ -11,6 +11,7 @@ import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.PasswordResetTokenRepository;
 import com.gameet.user.repository.UserProfileRepository;
 import com.gameet.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class UserService {
     @Transactional
     public UserDetailsResponse saveUserProfile(Long userId,
                                                UserProfileRequest userProfileRequest,
+                                               HttpServletRequest httpServletRequest,
                                                HttpServletResponse httpServletResponse) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -42,7 +44,7 @@ public class UserService {
         userProfileRepository.save(userProfile);
 
         user.promoteToUserRole();
-        authService.issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletResponse);
+        authService.issueTokenAndAttachToResponse(user.getUserId(), user.getRole(), httpServletRequest, httpServletResponse);
 
         return UserDetailsResponse.of(user);
     }

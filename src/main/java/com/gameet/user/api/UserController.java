@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -41,8 +42,9 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_GUEST')")
     public ResponseEntity<?> saveUserProfile(@RequestBody @Valid UserProfileRequest userProfileRequest,
                                              @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                             HttpServletRequest httpServletRequest,
                                              HttpServletResponse httpServletResponse) {
-        UserDetailsResponse response = userService.saveUserProfile(userPrincipal.getUserId(), userProfileRequest, httpServletResponse);
+        UserDetailsResponse response = userService.saveUserProfile(userPrincipal.getUserId(), userProfileRequest, httpServletRequest, httpServletResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
