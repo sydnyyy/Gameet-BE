@@ -101,6 +101,24 @@ public class AuthService {
         refreshTokenRepository.saveRefreshToken(userId, refreshToken);
     }
 
+    public void reissueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String refreshToken = jwtUtil.getRefreshToken(httpServletRequest);
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+        Role role = jwtUtil.getRoleFromToken(refreshToken);
+
+        boolean isValid = refreshTokenRepository.isValidRefreshToken(userId, refreshToken);
+        if (!isValid) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(userId, role);
+        httpServletResponse.setHeader(JwtUtil.HEADER_AUTHORIZATION, JwtUtil.TOKEN_PREFIX + newAccessToken);
+    }
+
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         String refreshToken = jwtUtil.getRefreshToken(httpServletRequest);
         if (refreshToken != null) {

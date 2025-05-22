@@ -142,4 +142,11 @@ public class AuthController {
                 EmailPurpose.PASSWORD_RESET, httpServletResponse);
         return ResponseEntity.ok("인증 성공");
     }
+
+    @PostMapping("/token/refresh")
+    public ResponseEntity<?> reissueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        authService.reissueAccessToken(httpServletRequest, httpServletResponse);
+        return ResponseEntity.ok("액세스 토큰 재발급 성공");
+    }
+
 }
