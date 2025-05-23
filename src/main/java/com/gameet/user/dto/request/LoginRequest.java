@@ -1,5 +1,6 @@
 package com.gameet.user.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -18,6 +19,7 @@ public record LoginRequest (
         @NotBlank(message = "비밀번호는 필수입니다.")
         String password,
 
+        @JsonProperty("rememberMe")
         @NotNull(message = "로그인 기억 여부 값은 필수입니다.")
         Boolean rememberMe
 ) {
