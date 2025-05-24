@@ -1,10 +1,10 @@
 package com.gameet.global.config;
 
+import com.gameet.global.exception.CustomAccessDeniedHandler;
+import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import com.gameet.global.jwt.JwtAuthenticationFilter;
 import com.gameet.global.jwt.JwtAuthenticationProvider;
 import com.gameet.global.jwt.JwtUtil;
-import com.gameet.global.exception.CustomAccessDeniedHandler;
-import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(SWAGGER_PATTERNS).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers("/api/users/auth/websocket/token").hasRole("USER")
+                        .requestMatchers("/api/match").hasRole("USER")
+                        .requestMatchers("/api/users/auth/token/websocket").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
                         .anyRequest().authenticated()
