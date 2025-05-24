@@ -1,10 +1,10 @@
 package com.gameet.global.config;
 
+import com.gameet.global.exception.CustomAccessDeniedHandler;
+import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import com.gameet.global.jwt.JwtAuthenticationFilter;
 import com.gameet.global.jwt.JwtAuthenticationProvider;
 import com.gameet.global.jwt.JwtUtil;
-import com.gameet.global.exception.CustomAccessDeniedHandler;
-import com.gameet.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(SWAGGER_PATTERNS).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers("/api/match").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
                         .anyRequest().authenticated()
@@ -60,6 +61,9 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            "/error",
+            "/", // 소켓 테스트용
+            "/index.html", // 소켓 테스트용
             "/ws/**",
             "/api/users/auth/sign-up/**",
             "/api/users/auth/login",
