@@ -197,4 +197,13 @@ public class AuthService {
     private String issuePasswordResetToken(String email) {
         return passwordResetTokenRepository.issuePasswordResetToken(email);
     }
+
+    public void issueWebsocketTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
+        String websocketToken = jwtUtil.generateWebSocketToken(userId, role);
+        Cookie cookie = new Cookie(JwtUtil.COOKIE_WEBSOCKET_TOKEN_NAME, websocketToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(10);
+        httpServletResponse.addCookie(cookie);
+    }
 }

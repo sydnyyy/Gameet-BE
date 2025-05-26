@@ -1,5 +1,6 @@
 package com.gameet.user.api;
 
+import com.gameet.global.dto.UserPrincipal;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
 import com.gameet.user.dto.request.LoginRequest;
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Auth", description = "인증 API")
@@ -154,4 +156,11 @@ public class AuthController {
         return ResponseEntity.ok("액세스 토큰 재발급 성공");
     }
 
+
+    @GetMapping("/token/websocket")
+    public ResponseEntity<?> getWebSocketToken(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               HttpServletResponse httpServletResponse) {
+        authService.issueWebsocketTokenAndAttachToResponse(userPrincipal.getUserId(), userPrincipal.getRole(), httpServletResponse);
+        return ResponseEntity.ok("웹소켓 토큰 발급 성공");
+    }
 }
