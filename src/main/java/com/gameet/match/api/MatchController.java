@@ -1,13 +1,20 @@
 package com.gameet.match.api;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.gameet.global.dto.UserPrincipal;
 import com.gameet.match.dto.request.MatchConditionRequest;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.service.MatchService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,14 +28,14 @@ public class MatchController {
                            @AuthenticationPrincipal UserPrincipal userPrincipal) {
         matchService.tryMatch(userPrincipal.getUserId(), matchConditionRequest);
 
-        return ResponseEntity.ok("매칭 시작");
+        return ResponseEntity.ok(MatchStatus.SEARCHING);
     }
 
     @DeleteMapping
     public ResponseEntity<?> cancelMatch(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         matchService.cancelMatch(userPrincipal.getUserId());
 
-        return ResponseEntity.ok("매칭 취소");
+        return ResponseEntity.ok(MatchStatus.CANCEL);
     }
 
     @GetMapping
