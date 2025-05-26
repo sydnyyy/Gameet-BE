@@ -1,9 +1,10 @@
 package com.gameet.common.enums;
 
+import com.gameet.common.enums.base.BaseCodeEnum;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum ActiveGame {
+public enum ActiveGame implements BaseCodeEnum {
 
     LEAGUE_OF_LEGENDS("리그 오브 레전드"),
     VALORANT("발로란트"),
@@ -17,4 +18,14 @@ public enum ActiveGame {
     ANIMAL_CROSSING("동물의 숲");
 
     private final String name;
+
+    @Override
+    public String getCode() {
+        return name();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

@@ -1,9 +1,10 @@
 package com.gameet.common.enums;
 
+import com.gameet.common.enums.base.BaseCodeEnum;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum PreferredGenre {
+public enum PreferredGenre implements BaseCodeEnum {
 
     RPG("롤플레잉"),
     FPS("1인칭 슈팅"),
@@ -18,4 +19,14 @@ public enum PreferredGenre {
     STEAM("스팀");
 
     private final String name;
+
+    @Override
+    public String getCode() {
+        return name();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

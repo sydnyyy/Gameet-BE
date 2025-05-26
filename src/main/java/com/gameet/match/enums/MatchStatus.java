@@ -12,5 +12,5 @@ public enum MatchStatus {
     FAILED("매칭 실패"),
     COMPLETED("매칭 종료");
 
-    private final String description;
+    private final String name;
 }
