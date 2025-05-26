@@ -157,7 +157,7 @@ public class AuthController {
     }
 
 
-    @GetMapping("/websocket/token")
+    @GetMapping("/token/websocket")
     public ResponseEntity<?> getWebSocketToken(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                HttpServletResponse httpServletResponse) {
         authService.issueWebsocketTokenAndAttachToResponse(userPrincipal.getUserId(), userPrincipal.getRole(), httpServletResponse);
