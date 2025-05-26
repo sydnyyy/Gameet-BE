@@ -1,5 +1,17 @@
 package com.gameet.match.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +20,13 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.annotation.MatchUserLockable;
 import com.gameet.match.domain.MatchCondition;
 import com.gameet.match.dto.request.MatchConditionRequest;
-import com.gameet.match.entity.*;
+import com.gameet.match.entity.MatchParticipant;
+import com.gameet.match.entity.MatchRoom;
+import com.gameet.match.entity.MatchSuccessCondition;
+import com.gameet.match.entity.MatchSuccessGamePlatform;
+import com.gameet.match.entity.MatchSuccessGamePlatformId;
+import com.gameet.match.entity.MatchSuccessPreferredGenre;
+import com.gameet.match.entity.MatchSuccessPreferredGenreId;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.mapper.MatchConditionMapper;
 import com.gameet.match.repository.MatchParticipantRepository;
@@ -16,14 +34,9 @@ import com.gameet.match.repository.MatchRepository;
 import com.gameet.match.repository.MatchRoomRepository;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,33 +64,36 @@ public class MatchService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         MatchCondition matchCondition = MatchConditionMapper.from(userProfile, matchConditionRequest);
 
-        matchRepository.getAllMatchUsers()
-                .forEach(otherMatchUserId -> {
-                    if (matchRepository.tryLock(otherMatchUserId)) {
-                        try {
-                            MatchCondition otherMatchCondition = matchRepository.getMatchConditionByUserId(otherMatchUserId);
+        Set<Long> allMatchUsers = matchRepository.getAllMatchUsers();
 
-                            boolean isMatchCompatible = MatchConditionMatcher.isMatchCompatible(otherMatchCondition, matchCondition);
-                            if (isMatchCompatible) {
-                                removeMatch(otherMatchUserId);
+        for (Long otherMatchUserId : allMatchUsers) {
+            if (matchRepository.tryLock(otherMatchUserId)) {
+                try {
+                    MatchCondition otherMatchCondition = matchRepository.getMatchConditionByUserId(otherMatchUserId);
 
-                                cancelScheduledTask(otherMatchUserId);
+                    boolean isMatchCompatible = MatchConditionMatcher.isMatchCompatible(otherMatchCondition, matchCondition);
+                    if (isMatchCompatible) {
+                        removeMatch(otherMatchUserId);
 
-                                Map<Long, MatchCondition> userMatchCondition = new HashMap<>();
-                                userMatchCondition.put(userId, matchCondition);
-                                userMatchCondition.put(otherMatchUserId, otherMatchCondition);
+                        cancelScheduledTask(otherMatchUserId);
 
-                                Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
+                        Map<Long, MatchCondition> userMatchCondition = new HashMap<>();
+                        userMatchCondition.put(userId, matchCondition);
+                        userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
-                                // TODO 알림 보내기
+                        Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
 
-                            }
-                        } finally {
-                            matchRepository.releaseLock(otherMatchUserId);
-                        }
+                        // TODO 알림 보내기
 
+
+                        return;
                     }
-                });
+                } finally {
+                    matchRepository.releaseLock(otherMatchUserId);
+                }
+
+            }
+        }
 
         matchRepository.addMatchUser(userId);
         matchRepository.saveMatchCondition(userId, convertMatchConditionToStringMap(matchCondition));
@@ -106,34 +122,38 @@ public class MatchService {
 
         steps.get(stepIndex).run();
 
-        matchRepository.getAllMatchUsers().stream()
-                .filter(otherMatchUserId -> !otherMatchUserId.equals(userId))
-                .forEach(otherMatchUserId -> {
-                    if (matchRepository.tryLock(otherMatchUserId)) {
-                        try {
-                            MatchCondition otherMatchCondition = matchRepository.getMatchConditionByUserId(otherMatchUserId);
-                            boolean isMatchCompatible = MatchConditionMatcher.isMatchCompatible(otherMatchCondition, matchCondition);
-                            if (isMatchCompatible && matchRepository.isMatchUserExists(userId)) {
+        Set<Long> allMatchUsers = matchRepository.getAllMatchUsers();
 
-                                removeMatch(userId);
-                                removeMatch(otherMatchUserId);
+        for (Long otherMatchUserId : allMatchUsers) {
+            if (otherMatchUserId.equals(userId)) {
+                continue;
+            }
+            if (matchRepository.tryLock(otherMatchUserId)) {
+                try {
+                    MatchCondition otherMatchCondition = matchRepository.getMatchConditionByUserId(otherMatchUserId);
+                    boolean isMatchCompatible = MatchConditionMatcher.isMatchCompatible(otherMatchCondition, matchCondition);
+                    if (isMatchCompatible && matchRepository.isMatchUserExists(userId)) {
 
-                                cancelScheduledTask(otherMatchUserId);
+                        removeMatch(userId);
+                        removeMatch(otherMatchUserId);
 
-                                Map<Long, MatchCondition> userMatchCondition = new HashMap<>();
-                                userMatchCondition.put(userId, matchCondition);
-                                userMatchCondition.put(otherMatchUserId, otherMatchCondition);
+                        cancelScheduledTask(otherMatchUserId);
 
-                                Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
+                        Map<Long, MatchCondition> userMatchCondition = new HashMap<>();
+                        userMatchCondition.put(userId, matchCondition);
+                        userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
-                                // TODO 알림 보내기
+                        Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
 
-                            }
-                        } finally {
-                            matchRepository.releaseLock(otherMatchUserId);
-                        }
+                        // TODO 알림 보내기
+
+                        return;
                     }
-                });
+                } finally {
+                    matchRepository.releaseLock(otherMatchUserId);
+                }
+            }
+        }
 
         matchRepository.saveMatchCondition(userId, convertMatchConditionToStringMap(matchCondition));
 
