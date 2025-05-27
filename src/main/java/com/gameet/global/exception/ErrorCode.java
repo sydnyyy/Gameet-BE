@@ -16,6 +16,7 @@ public enum ErrorCode {
     ALREADY_EXISTS_USER_PROFILE(HttpStatus.BAD_REQUEST, "유저 프로필이 이미 존재합니다."),
     USER_PROFILE_NOT_FOUND(HttpStatus.BAD_REQUEST, "유저 프로필이 존재하지 않습니다. 기본 프로필을 생성해주세요."),
     INVALID_OR_EXPIRED_PASSWORD_RESET_TOKEN(HttpStatus.UNAUTHORIZED, "비밀번호 재설정 토큰이 유효하지 않거나 만료되었습니다."),
+    NOT_FOUND_EMAIL(HttpStatus.NOT_FOUND, "이메일이 존재하지 않습니다."),
 
     // JWT
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED,"유효하지 않은 토큰입니다."),
@@ -34,7 +35,8 @@ public enum ErrorCode {
     // match
     ALREADY_SEARCHING(HttpStatus.BAD_REQUEST, "이미 매칭 중입니다."),
     ALREADY_MATCHED(HttpStatus.BAD_REQUEST, "이미 매칭이 완료된 상태입니다."),
-    MATCH_LOCK_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "현재 매칭을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.")
+    MATCH_LOCK_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "현재 매칭을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요."),
+    INVALID_MATCH_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 매칭 상태입니다.")
     ;
 
     private final HttpStatus status;
