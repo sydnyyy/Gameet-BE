@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.gameet.common.service.NotificationService;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,6 +50,7 @@ public class MatchService {
     private final MatchRoomRepository matchRoomRepository;
     private final MatchParticipantRepository matchParticipantRepository;
     private final UserProfileRepository userProfileRepository;
+    private final NotificationService notificationService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
@@ -83,8 +85,7 @@ public class MatchService {
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
 
-                        // TODO 알림 보내기
-
+                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED);
 
                         return;
                     }
@@ -145,7 +146,7 @@ public class MatchService {
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
 
-                        // TODO 알림 보내기
+                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED);
 
                         return;
                     }
@@ -166,8 +167,7 @@ public class MatchService {
     @MatchUserLockable
     private void failMatch(Long userId) {
         removeMatch(userId);
-
-        // TODO 알림 보내기
+        notificationService.sendMatchResult(userId, MatchStatus.FAILED);
     }
 
     @MatchUserLockable
