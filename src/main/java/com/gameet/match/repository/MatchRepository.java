@@ -98,13 +98,15 @@ public class MatchRepository {
     }
 
     public MatchCondition getMatchConditionByUserId(Long userId) {
-        Map<Object, Object> matchCondition = redisTemplate.opsForHash().entries(getMatchConditionKey(userId));
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(getMatchConditionKey(userId));
 
-        Map<String, Object> normalizedEntries = matchCondition.entrySet().stream()
-                .collect(Collectors.toMap(
-                        e -> String.valueOf(e.getKey()),
-                        e -> parseIfJsonArray(String.valueOf(e.getValue()))
-                ));
+        Map<String, Object> normalizedEntries = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : entries.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            String val = String.valueOf(entry.getValue()).trim();
+            Object parsed = val.isEmpty() ? null : parseIfJsonArray(val);
+            normalizedEntries.put(key, parsed);
+        }
 
         return objectMapper.convertValue(normalizedEntries, MatchCondition.class);
     }
