@@ -62,6 +62,19 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(summary = "프로필 조회 (프로필 수정 전)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 가져오기 성공", content = @Content(schema = @Schema(implementation = UserDetailsResponse.class))),
+            @ApiResponse(responseCode = "400", description = "데이터 존재하지 않음", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "403", description = "ROLE=USER 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        UserDetailsResponse response = userService.findUserProfile(userPrincipal.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @Operation(summary = "닉네임 유효성 검사")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "닉네임 유니크 여부 결과 반환", content = @Content(schema = @Schema(implementation = String.class))),
