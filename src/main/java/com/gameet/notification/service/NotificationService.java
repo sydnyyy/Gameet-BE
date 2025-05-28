@@ -2,6 +2,7 @@ package com.gameet.notification.service;
 
 import com.gameet.notification.dto.NotificationPayload;
 import com.gameet.match.enums.MatchStatus;
+import com.gameet.notification.enums.MessageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,17 +16,17 @@ public class NotificationService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final EmailService emailService;
 
-    public void sendMatchResult(List<Long> userId, MatchStatus matchStatus) {
-        userId.forEach(id -> sendMatchResult(id, matchStatus));
+    public void sendMatchResult(MessageType messageType, List<Long> userId, MatchStatus matchStatus) {
+        userId.forEach(id -> sendMatchResult(messageType, id, matchStatus));
     }
 
-    public void sendMatchResult(Long userId, MatchStatus matchStatus) {
-        sendWebNotification(userId, matchStatus);
+    public void sendMatchResult(MessageType messageType, Long userId, MatchStatus matchStatus) {
+        sendWebNotification(messageType, userId, matchStatus);
         emailService.sendMatchResultAsync(userId, matchStatus);
     }
 
-    private void sendWebNotification(Long userId, MatchStatus matchStatus) {
-        NotificationPayload payload = NotificationPayload.of(matchStatus);
+    private void sendWebNotification(MessageType messageType, Long userId, MatchStatus matchStatus) {
+        NotificationPayload payload = NotificationPayload.of(messageType, matchStatus);
 
         simpMessagingTemplate.convertAndSendToUser(
                 String.valueOf(userId),

@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.gameet.notification.enums.MessageType;
 import com.gameet.notification.service.NotificationService;
 import org.springframework.stereotype.Service;
 
@@ -85,7 +86,7 @@ public class MatchService {
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
 
-                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED);
+                        notificationService.sendMatchResult(MessageType.MATCH_RESULT, List.of(userId, otherMatchUserId), MatchStatus.MATCHED);
 
                         return;
                     }
@@ -146,7 +147,7 @@ public class MatchService {
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
 
-                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED);
+                        notificationService.sendMatchResult(MessageType.MATCH_RESULT, List.of(userId, otherMatchUserId), MatchStatus.MATCHED);
 
                         return;
                     }
@@ -167,7 +168,7 @@ public class MatchService {
     @MatchUserLockable
     private void failMatch(Long userId) {
         removeMatch(userId);
-        notificationService.sendMatchResult(userId, MatchStatus.FAILED);
+        notificationService.sendMatchResult(MessageType.MATCH_RESULT, userId, MatchStatus.FAILED);
     }
 
     @MatchUserLockable
