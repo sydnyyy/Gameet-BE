@@ -36,7 +36,10 @@ public enum ErrorCode {
     ALREADY_SEARCHING(HttpStatus.BAD_REQUEST, "이미 매칭 중입니다."),
     ALREADY_MATCHED(HttpStatus.BAD_REQUEST, "이미 매칭이 완료된 상태입니다."),
     MATCH_LOCK_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "현재 매칭을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요."),
-    INVALID_MATCH_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 매칭 상태입니다.")
+    INVALID_MATCH_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 매칭 상태입니다."),
+    NOT_FOUND_MATCH_ROOM(HttpStatus.BAD_REQUEST, "매칭룸이 존재하지 않습니다."),
+    NO_AUTH_MATCH_ROOM(HttpStatus.FORBIDDEN, "해당 매칭룸에 대한 권한이 없습니다."),
+    ONLY_MATCHED_STATUS_ALLOWED(HttpStatus.BAD_REQUEST, "매칭 상태가 MATCHED일 때만 약속을 잡을 수 있습니다.");
     ;
 
     private final HttpStatus status;
