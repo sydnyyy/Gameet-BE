@@ -62,6 +62,18 @@ public class UserService {
         return UserDetailsResponse.of(user);
     }
 
+    @Transactional
+    public UserDetailsResponse findUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getUserProfile() == null) {
+            throw new CustomException(ErrorCode.USER_PROFILE_NOT_FOUND);
+        }
+
+        return UserDetailsResponse.of(user);
+    }
+
     public Boolean isNicknameAvailable(String nickname) {
         return !userProfileRepository.existsByNickname(nickname);
     }
