@@ -1,4 +1,4 @@
-package com.gameet.common.dto;
+package com.gameet.notification.dto;
 
 import com.gameet.match.enums.MatchStatus;
 import lombok.Builder;

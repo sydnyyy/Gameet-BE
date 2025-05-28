@@ -1,6 +1,6 @@
 package com.gameet.notification.service;
 
-import com.gameet.common.dto.NotificationPayload;
+import com.gameet.notification.dto.NotificationPayload;
 import com.gameet.match.enums.MatchStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
