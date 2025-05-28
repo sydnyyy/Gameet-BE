@@ -30,7 +30,7 @@ public record UserProfileRequest (
         List<PreferredGenre> preferredGenres,
 
         @NotEmpty(message = "플랫폼은 필수입니다.")
-        List<GamePlatform> platforms,
+        List<GamePlatform> gamePlatforms,
 
         @NotNull(message = "플레이 스타일은 필수입니다.")
         PlayStyle playStyle,

@@ -92,7 +92,7 @@ public class UserProfile extends BaseTimeEntity {
                 .map(genre -> UserPreferredGenre.of(genre, userProfile))
                 .toList();
 
-        List<UserGamePlatform> userGamePlatforms = userProfileRequest.platforms().stream()
+        List<UserGamePlatform> userGamePlatforms = userProfileRequest.gamePlatforms().stream()
                 .map(platform -> UserGamePlatform.of(platform, userProfile))
                 .toList();
 
