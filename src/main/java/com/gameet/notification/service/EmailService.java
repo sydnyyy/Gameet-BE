@@ -4,6 +4,9 @@ import com.gameet.common.enums.EmailPurpose;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.enums.MatchStatus;
+import com.gameet.notification.entity.MatchEmailSendLog;
+import com.gameet.notification.enums.MessageType;
+import com.gameet.notification.repository.MatchEmailSendLogRepository;
 import com.gameet.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,12 +14,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
+    private final MatchEmailSendLogRepository matchEmailSendLogRepository;
 
     public void sendVerificationCode(String toEmail, String verificationCode, EmailPurpose emailPurpose) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -43,5 +49,8 @@ public class EmailService {
         message.setText(content + "\n페이지에 접속해주세요!");
 
         javaMailSender.send(message);
+
+        MatchEmailSendLog sendLog = MatchEmailSendLog.of(userId, MessageType.MATCH_RESULT, content, LocalDateTime.now());
+        matchEmailSendLogRepository.save(sendLog);
     }
 }
