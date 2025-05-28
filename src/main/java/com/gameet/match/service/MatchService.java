@@ -14,6 +14,8 @@ import com.gameet.match.mapper.MatchConditionMapper;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
 import com.gameet.match.repository.MatchRoomRepository;
+import com.gameet.notification.enums.MessageType;
+import com.gameet.notification.service.NotificationService;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class MatchService {
     private final MatchRoomRepository matchRoomRepository;
     private final MatchParticipantRepository matchParticipantRepository;
     private final UserProfileRepository userProfileRepository;
+    private final NotificationService notificationService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
@@ -79,9 +82,12 @@ public class MatchService {
                         userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
-
-                        // TODO 알림 보내기
-
+                        notificationService.sendMatchResult(
+                                MessageType.MATCH_RESULT,
+                                List.of(userId, otherMatchUserId),
+                                MatchStatus.MATCHED,
+                                matchRoomId
+                        );
 
                         return;
                     }
@@ -145,8 +151,12 @@ public class MatchService {
                         userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
-
-                        // TODO 알림 보내기
+                        notificationService.sendMatchResult(
+                                MessageType.MATCH_RESULT,
+                                List.of(userId, otherMatchUserId),
+                                MatchStatus.MATCHED,
+                                matchRoomId
+                        );
 
                         return;
                     }
@@ -169,8 +179,12 @@ public class MatchService {
     protected void failMatch(Long userId) {
         log.info("[매칭 실패] 사용자 {}", userId);
         removeMatch(userId);
-
-        // TODO 알림 보내기
+        notificationService.sendMatchResult(
+                MessageType.MATCH_RESULT,
+                userId,
+                MatchStatus.FAILED,
+                null
+        );
     }
 
     @MatchUserLockable
