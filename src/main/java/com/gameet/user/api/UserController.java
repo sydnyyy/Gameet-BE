@@ -4,6 +4,7 @@ import com.gameet.global.dto.UserPrincipal;
 import com.gameet.user.dto.request.UserProfileRequest;
 import com.gameet.user.dto.request.UserProfileUpdateRequest;
 import com.gameet.user.dto.response.UserDetailsResponse;
+import com.gameet.user.dto.response.UserPublicProfileResponse;
 import com.gameet.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,6 +73,18 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         UserDetailsResponse response = userService.findUserProfile(userPrincipal.getUserId());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @Operation(summary = "공개용 프로필 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 가져오기 성공", content = @Content(schema = @Schema(implementation = UserDetailsResponse.class))),
+            @ApiResponse(responseCode = "400", description = "데이터 존재하지 않음", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "403", description = "ROLE=USER 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
+    })
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> findUserPublicProfile(@PathVariable Long userId) {
+        UserPublicProfileResponse response = userService.findUserPublicProfile(userId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
