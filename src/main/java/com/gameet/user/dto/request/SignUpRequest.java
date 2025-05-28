@@ -1,5 +1,7 @@
 package com.gameet.user.dto.request;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.gameet.common.util.jackson.MaskingSerializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
@@ -14,6 +16,7 @@ public record SignUpRequest (
         )
         String email,
 
+        @JsonSerialize(using = MaskingSerializer.class)
         @NotBlank(message = "비밀번호는 필수입니다.")
         String password
 ) {

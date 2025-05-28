@@ -1,5 +1,6 @@
 package com.gameet.user.api;
 
+import com.gameet.global.annotation.AccessLoggable;
 import com.gameet.global.dto.UserPrincipal;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
@@ -42,6 +43,7 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "회원가입 성공 -> GUEST 권한 부여", content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패 or 중복 이메일", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "일반 사용자 회원가입")
     @PostMapping("/sign-up/user")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
         UserResponse response = authService.registerUser(signUpRequest, Role.GUEST, httpServletResponse);
@@ -59,6 +61,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "회원가입 인증 코드 전송 완료", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "회원가입 이메일 인증 코드 전송")
     @PostMapping("/sign-up/send-code")
     public ResponseEntity<?> sendSignUpCode(@RequestBody @Valid SendEmailVerificationCodeRequest sendEmailVerificationCodeRequest) {
         authService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.SIGN_UP);
@@ -71,6 +74,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "인증 코드 불일치", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "회원가입 이메일 인증 코드 검증")
     @PostMapping("/sign-up/verify-code")
     public ResponseEntity<?> verifySignUpCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest,
                                               HttpServletResponse httpServletResponse) {
@@ -86,6 +90,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "비밀번호 불일치", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "로그인")
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         UserResponse response = authService.login(loginRequest, httpServletResponse);
@@ -96,6 +101,7 @@ public class AuthController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         authService.logout(httpServletRequest, httpServletResponse);
@@ -107,6 +113,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "비밀번호 재설정용 토큰 만료", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "비밀번호 재설정")
     @PostMapping("/password-reset")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid PasswordResetRequest passwordResetRequest, HttpServletRequest httpServletRequest) {
         String passwordResetToken = httpServletRequest.getHeader(AuthService.HEADER_PASSWORD_RESET_TOKEN);
@@ -124,18 +131,20 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "이메일에 해당되는 유저 없음", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "비밀번호 재설정 인증 코드 전송")
     @PostMapping("/password-reset/send-code")
     public ResponseEntity<?> sendPasswordResetCode(@RequestBody @Valid SendEmailVerificationCodeRequest sendEmailVerificationCodeRequest) {
         authService.sendVerificationCode(sendEmailVerificationCodeRequest.email(), EmailPurpose.PASSWORD_RESET);
         return ResponseEntity.ok("비밀번호 재설정 코드 전송");
     }
 
-    @Operation(summary = "비밀번호 재설성 인증 코드 검증")
+    @Operation(summary = "비밀번호 재설정 인증 코드 검증")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "비밀번호 재설성 인증 코드 일치", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "인증 코드 불일치", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "비밀번호 재설정 인증 코드 검증")
     @PostMapping("/password-reset/verify-code")
     public ResponseEntity<?> verifyPasswordResetCode(@RequestBody @Valid VerifyEmailCodeRequest verifyEmailCodeRequest,
                                                      HttpServletResponse httpServletResponse) {
@@ -150,13 +159,14 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "액세스 토큰 재발급 성공", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "리프레시 토큰 만료 or 유효하지 않은 상태", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "액세스 토큰 재발급")
     @PostMapping("/token/refresh")
     public ResponseEntity<?> reissueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         authService.reissueAccessToken(httpServletRequest, httpServletResponse);
         return ResponseEntity.ok("액세스 토큰 재발급 성공");
     }
 
-
+    @AccessLoggable(action = "웹소켓 토큰 발급")
     @GetMapping("/token/websocket")
     public ResponseEntity<?> getWebSocketToken(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                HttpServletResponse httpServletResponse) {

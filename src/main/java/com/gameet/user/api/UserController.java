@@ -1,5 +1,6 @@
 package com.gameet.user.api;
 
+import com.gameet.global.annotation.AccessLoggable;
 import com.gameet.global.dto.UserPrincipal;
 import com.gameet.user.dto.request.UserProfileRequest;
 import com.gameet.user.dto.request.UserProfileUpdateRequest;
@@ -39,6 +40,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패 or 닉네임 중복", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "403", description = "ROLE=GUEST 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "프로필 최초 생성")
     @PostMapping
     @PreAuthorize("hasRole('ROLE_GUEST')")
     public ResponseEntity<?> saveUserProfile(@RequestBody @Valid UserProfileRequest userProfileRequest,
@@ -55,6 +57,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "403", description = "ROLE=USER 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "프로필 수정")
     @PutMapping
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> updateUserProfile(@RequestBody @Valid UserProfileUpdateRequest userProfileUpdateRequest,
@@ -69,6 +72,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "데이터 존재하지 않음", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "403", description = "ROLE=USER 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "프로필 조회 (프로필 수정 전)")
     @GetMapping
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<?> findUserProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -82,6 +86,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "데이터 존재하지 않음", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "403", description = "ROLE=USER 만 접근 가능", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "공개용 프로필 조회")
     @GetMapping("/{userId}")
     public ResponseEntity<?> findUserPublicProfile(@PathVariable Long userId) {
         UserPublicProfileResponse response = userService.findUserPublicProfile(userId);
@@ -93,6 +98,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "닉네임 유니크 여부 결과 반환", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "요청 데이터 유효성 검사 실패", content = @Content(schema = @Schema(implementation = String.class)))
     })
+    @AccessLoggable(action = "닉네임 유효성 검사")
     @GetMapping("/nickname-available")
     public ResponseEntity<Boolean> isNicknameAvailable(@RequestParam @Size(min = 1, message = "닉네임은 1자 이상이어야 합니다.") String nickname) {
         Boolean isAvailable = userService.isNicknameAvailable(nickname);
