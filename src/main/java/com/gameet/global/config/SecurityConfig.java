@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/users/profile").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile/{userId}").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -70,7 +71,5 @@ public class SecurityConfig {
             "/api/users/profile/nickname-available",
             "/api/users/auth/token/refresh",
             "/error",
-            "/test/**",
-            "/test2/**"
     };
 }
