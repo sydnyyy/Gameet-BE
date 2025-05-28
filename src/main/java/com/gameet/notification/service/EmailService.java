@@ -25,16 +25,12 @@ public class EmailService {
     private final MatchEmailSendLogRepository matchEmailSendLogRepository;
 
     public void sendVerificationCode(String toEmail, String verificationCode, EmailPurpose emailPurpose) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("[Gameet] " + emailPurpose.getDescription() + " 이메일 인증 코드입니다.");
-        message.setText("Gameet " + emailPurpose.getDescription() + " 이메일 인증 코드입니다.\n\n" +
-                "인증 코드: " + verificationCode + "\n\n" +
+        String subject = emailPurpose.getDescription() + " 이메일 인증 코드입니다.";
+        String content = "인증 코드: " + verificationCode + "\n\n" +
                 "인증 코드 입력 기한은 5분입니다.\n" +
-                "요청하지 않았다면 메일을 무시하셔도 됩니다.\n" +
-                "감사합니다.");
+                "요청하지 않았다면 메일을 무시하셔도 됩니다.\n";
 
-        javaMailSender.send(message);
+        send(toEmail, subject, content);
     }
 
     @Async("emailExecutor")
@@ -42,15 +38,32 @@ public class EmailService {
         String toEmail = userRepository.findEmailByUserId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_EMAIL));
 
-        String content = MatchStatus.getMessage(matchStatus);
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("[Gameet] " + content);
-        message.setText(content + "\n페이지에 접속해주세요!");
-
-        javaMailSender.send(message);
+        String subject = MatchStatus.getMessage(matchStatus);
+        String content = subject + "\n페이지에 접속해주세요!";
+        send(toEmail, subject, subject);
 
         MatchEmailSendLog sendLog = MatchEmailSendLog.of(userId, MessageType.MATCH_RESULT, content, LocalDateTime.now());
         matchEmailSendLogRepository.save(sendLog);
+    }
+
+    @Async("emailExecutor")
+    public void sendMatchAppointmentAsync(Long userId, String subject) {
+        String toEmail = userRepository.findEmailByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_EMAIL));
+
+        String content = subject + "\n게임에 접속해주세요!";
+        send(toEmail, subject, content);
+
+        MatchEmailSendLog sendLog = MatchEmailSendLog.of(userId, MessageType.MATCH_RESULT, content, LocalDateTime.now());
+        matchEmailSendLogRepository.save(sendLog);
+    }
+
+    private void send(String toEmail, String subject, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("[Gameet] " + subject);
+        message.setText(content);
+
+        javaMailSender.send(message);
     }
 }

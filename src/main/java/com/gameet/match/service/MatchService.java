@@ -17,7 +17,6 @@ import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
 import com.gameet.match.repository.MatchRoomRepository;
-import com.gameet.notification.enums.MessageType;
 import com.gameet.notification.service.NotificationService;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
@@ -87,12 +86,7 @@ public class MatchService {
                         userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
-                        notificationService.sendMatchResult(
-                                MessageType.MATCH_RESULT,
-                                List.of(userId, otherMatchUserId),
-                                MatchStatus.MATCHED,
-                                matchRoomId
-                        );
+                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED, matchRoomId);
 
                         return;
                     }
@@ -156,12 +150,7 @@ public class MatchService {
                         userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
-                        notificationService.sendMatchResult(
-                                MessageType.MATCH_RESULT,
-                                List.of(userId, otherMatchUserId),
-                                MatchStatus.MATCHED,
-                                matchRoomId
-                        );
+                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED, matchRoomId);
 
                         return;
                     }
@@ -184,12 +173,7 @@ public class MatchService {
     protected void failMatch(Long userId) {
         log.info("[매칭 실패] 사용자 {}", userId);
         removeMatch(userId);
-        notificationService.sendMatchResult(
-                MessageType.MATCH_RESULT,
-                userId,
-                MatchStatus.FAILED,
-                null
-        );
+        notificationService.sendMatchResult(userId, MatchStatus.FAILED, null);
     }
 
     @MatchUserLockable
