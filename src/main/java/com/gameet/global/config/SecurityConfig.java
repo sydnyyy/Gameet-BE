@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/auth/token/websocket").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile/{userId}").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -68,6 +70,6 @@ public class SecurityConfig {
             "/api/users/auth/password-reset/**",
             "/api/users/profile/nickname-available",
             "/api/users/auth/token/refresh",
-            "/error"
+            "/error",
     };
 }

@@ -6,6 +6,7 @@ import com.gameet.user.dto.request.PasswordResetRequest;
 import com.gameet.user.dto.response.UserDetailsResponse;
 import com.gameet.user.dto.request.UserProfileRequest;
 import com.gameet.user.dto.request.UserProfileUpdateRequest;
+import com.gameet.user.dto.response.UserPublicProfileResponse;
 import com.gameet.user.entity.User;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.PasswordResetTokenRepository;
@@ -60,6 +61,24 @@ public class UserService {
 
         user.getUserProfile().update(userProfileUpdateRequest);
         return UserDetailsResponse.of(user);
+    }
+
+    public UserDetailsResponse findUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getUserProfile() == null) {
+            throw new CustomException(ErrorCode.USER_PROFILE_NOT_FOUND);
+        }
+
+        return UserDetailsResponse.of(user);
+    }
+
+    public UserPublicProfileResponse findUserPublicProfile(Long userId) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_PROFILE_NOT_FOUND));
+
+        return UserPublicProfileResponse.of(userProfile);
     }
 
     public Boolean isNicknameAvailable(String nickname) {

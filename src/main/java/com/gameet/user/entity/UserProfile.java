@@ -51,12 +51,12 @@ public class UserProfile extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer mannerScore = 60;
 
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Column(nullable = false)
     @Setter(AccessLevel.PRIVATE)
     private List<UserPreferredGenre> preferredGenres;
 
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Column(nullable = false)
     @Setter(AccessLevel.PRIVATE)
     private List<UserGamePlatform> gamePlatforms;
@@ -92,7 +92,7 @@ public class UserProfile extends BaseTimeEntity {
                 .map(genre -> UserPreferredGenre.of(genre, userProfile))
                 .toList();
 
-        List<UserGamePlatform> userGamePlatforms = userProfileRequest.platforms().stream()
+        List<UserGamePlatform> userGamePlatforms = userProfileRequest.gamePlatforms().stream()
                 .map(platform -> UserGamePlatform.of(platform, userProfile))
                 .toList();
 
@@ -120,9 +120,9 @@ public class UserProfile extends BaseTimeEntity {
 
         updateCollection(
                 this.gamePlatforms,
-                request.platforms(),
+                request.gamePlatforms(),
                 UserGamePlatform::getGamePlatform,
-                platform -> UserGamePlatform.of(platform, this)
+                gamePlatform -> UserGamePlatform.of(gamePlatform, this)
         );
 
         updateIfChanged(request.playStyle(), this.playStyle, this::setPlayStyle);

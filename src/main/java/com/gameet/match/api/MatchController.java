@@ -1,5 +1,6 @@
 package com.gameet.match.api;
 
+import com.gameet.global.annotation.AccessLoggable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +24,7 @@ public class MatchController {
 
     private final MatchService matchService;
 
+    @AccessLoggable(action = "매칭 시작")
     @PostMapping
     public ResponseEntity<?> tryMatch(@RequestBody MatchConditionRequest matchConditionRequest,
                            @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -31,6 +33,7 @@ public class MatchController {
         return ResponseEntity.ok(MatchStatus.SEARCHING);
     }
 
+    @AccessLoggable(action = "매칭 취소")
     @DeleteMapping
     public ResponseEntity<?> cancelMatch(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         matchService.cancelMatch(userPrincipal.getUserId());
@@ -38,6 +41,7 @@ public class MatchController {
         return ResponseEntity.ok(MatchStatus.CANCEL);
     }
 
+    @AccessLoggable(action = "매칭 상태 조회")
     @GetMapping
     public ResponseEntity<?> matchStatus(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         MatchStatus matchStatus = matchService.getMatchStatus(userPrincipal.getUserId());
