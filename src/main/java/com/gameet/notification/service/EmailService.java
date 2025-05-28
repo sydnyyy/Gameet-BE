@@ -1,4 +1,4 @@
-package com.gameet.common.service;
+package com.gameet.notification.service;
 
 import com.gameet.common.enums.EmailPurpose;
 import com.gameet.global.exception.CustomException;

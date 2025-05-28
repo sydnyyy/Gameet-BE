@@ -1,7 +1,7 @@
 package com.gameet.user.service;
 
 import com.gameet.common.enums.EmailPurpose;
-import com.gameet.common.service.EmailService;
+import com.gameet.notification.service.EmailService;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
 import com.gameet.user.enums.Role;
