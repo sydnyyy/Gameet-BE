@@ -51,12 +51,12 @@ public class UserProfile extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer mannerScore = 60;
 
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Column(nullable = false)
     @Setter(AccessLevel.PRIVATE)
     private List<UserPreferredGenre> preferredGenres;
 
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Column(nullable = false)
     @Setter(AccessLevel.PRIVATE)
     private List<UserGamePlatform> gamePlatforms;
