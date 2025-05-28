@@ -20,7 +20,7 @@ public record UserProfileUpdateRequest (
         String gender,
 
         List<PreferredGenre> preferredGenres,
-        List<GamePlatform> platforms,
+        List<GamePlatform> gamePlatforms,
         PlayStyle playStyle,
         GameSkillLevel gameSkillLevel,
         Boolean isAdultMatchAllowed,

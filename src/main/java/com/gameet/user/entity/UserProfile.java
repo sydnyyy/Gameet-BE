@@ -120,9 +120,9 @@ public class UserProfile extends BaseTimeEntity {
 
         updateCollection(
                 this.gamePlatforms,
-                request.platforms(),
+                request.gamePlatforms(),
                 UserGamePlatform::getGamePlatform,
-                platform -> UserGamePlatform.of(platform, this)
+                gamePlatform -> UserGamePlatform.of(gamePlatform, this)
         );
 
         updateIfChanged(request.playStyle(), this.playStyle, this::setPlayStyle);
