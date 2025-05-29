@@ -1,6 +1,9 @@
 package com.gameet.match.api;
 
 import com.gameet.global.annotation.AccessLoggable;
+import com.gameet.match.dto.request.MatchAppointmentRequest;
+import com.gameet.match.dto.response.MatchAppointmentResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,5 +50,12 @@ public class MatchController {
         MatchStatus matchStatus = matchService.getMatchStatus(userPrincipal.getUserId());
 
         return ResponseEntity.ok(matchStatus);
+    }
+
+    @PostMapping("/match-appointment")
+    public ResponseEntity<?> createMatchAppointment(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                    @RequestBody @Valid MatchAppointmentRequest matchAppointmentRequest) {
+        MatchAppointmentResponse response = matchService.createMatchAppointment(userPrincipal.getUserId(), matchAppointmentRequest);
+        return ResponseEntity.ok(response);
     }
 }

@@ -7,19 +7,24 @@ import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.annotation.MatchUserLockable;
 import com.gameet.match.domain.MatchCondition;
+import com.gameet.match.dto.request.MatchAppointmentRequest;
 import com.gameet.match.dto.request.MatchConditionRequest;
+import com.gameet.match.dto.response.MatchAppointmentResponse;
 import com.gameet.match.entity.*;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.mapper.MatchConditionMapper;
+import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
 import com.gameet.match.repository.MatchRoomRepository;
+import com.gameet.notification.service.NotificationService;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +43,8 @@ public class MatchService {
     private final MatchRoomRepository matchRoomRepository;
     private final MatchParticipantRepository matchParticipantRepository;
     private final UserProfileRepository userProfileRepository;
+    private final NotificationService notificationService;
+    private final MatchAppointmentRepository matchAppointmentRepository;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
@@ -79,9 +86,7 @@ public class MatchService {
                         userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
-
-                        // TODO 알림 보내기
-
+                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED, matchRoomId);
 
                         return;
                     }
@@ -145,8 +150,7 @@ public class MatchService {
                         userMatchCondition.put(otherMatchUserId, otherMatchCondition);
 
                         Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
-
-                        // TODO 알림 보내기
+                        notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED, matchRoomId);
 
                         return;
                     }
@@ -169,8 +173,7 @@ public class MatchService {
     protected void failMatch(Long userId) {
         log.info("[매칭 실패] 사용자 {}", userId);
         removeMatch(userId);
-
-        // TODO 알림 보내기
+        notificationService.sendMatchResult(userId, MatchStatus.FAILED, null);
     }
 
     @MatchUserLockable
@@ -275,5 +278,27 @@ public class MatchService {
         });
 
         return stringMap;
+    }
+
+    @Transactional
+    public MatchAppointmentResponse createMatchAppointment(Long userId, MatchAppointmentRequest matchAppointmentRequest) {
+        MatchRoom matchRoom = matchRoomRepository.findById(matchAppointmentRequest.matchRoomId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_ROOM));
+
+        boolean isParticipant = matchRoom.getMatchParticipants().stream()
+                .anyMatch(mp -> mp.getUserProfile().getUser().getUserId().equals(userId));
+
+        if (!isParticipant) {
+            throw new CustomException(ErrorCode.NO_AUTH_MATCH_ROOM);
+        }
+
+        if (!matchRoom.getMatchStatus().equals(MatchStatus.MATCHED)) {
+            throw new CustomException(ErrorCode.ONLY_MATCHED_STATUS_ALLOWED);
+        }
+
+        MatchAppointment appointment = MatchAppointment.of(matchAppointmentRequest);
+        matchAppointmentRepository.save(appointment);
+
+        return MatchAppointmentResponse.of(appointment);
     }
 }
