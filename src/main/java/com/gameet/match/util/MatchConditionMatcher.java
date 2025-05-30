@@ -1,4 +1,4 @@
-package com.gameet.match.service;
+package com.gameet.match.util;
 
 import com.gameet.common.enums.GamePlatform;
 import com.gameet.common.enums.GameSkillLevel;
