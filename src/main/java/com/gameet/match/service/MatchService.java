@@ -17,6 +17,7 @@ import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
 import com.gameet.match.repository.MatchRoomRepository;
+import com.gameet.match.util.MatchConditionMatcher;
 import com.gameet.notification.service.NotificationService;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
