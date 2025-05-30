@@ -29,7 +29,7 @@ public class MatchController {
 
     @AccessLoggable(action = "매칭 시작")
     @PostMapping
-    public ResponseEntity<?> tryMatch(@RequestBody MatchConditionRequest matchConditionRequest,
+    public ResponseEntity<?> tryMatch(@RequestBody @Valid MatchConditionRequest matchConditionRequest,
                            @AuthenticationPrincipal UserPrincipal userPrincipal) {
         matchService.tryMatch(userPrincipal.getUserId(), matchConditionRequest);
 
