@@ -30,4 +30,14 @@ public record NotificationPayload (
                 .content(matchAppointment.getAppointmentAt().toLocalTime() + " 예약 시간이 다가옵니다!")
                 .build();
     }
+
+    public static NotificationPayload fromStompSubscribeEvent(String destination) {
+        return NotificationPayload.builder()
+                .messageType(MessageType.STOMP_SUBSCRIBE)
+                .matchStatus(null)
+                .matchRoomId(null)
+                .content(destination + " 구독 성공했습니다.")
+                .build();
+
+    }
 }

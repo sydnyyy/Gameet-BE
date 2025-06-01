@@ -1,6 +1,6 @@
 package com.gameet.global.config.websocket;
 
-import com.gameet.global.dto.StompSubscribePayload;
+import com.gameet.notification.dto.NotificationPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -23,7 +23,7 @@ public class StompSubscribeEventListener implements ApplicationListener<SessionS
         String destination = accessor.getDestination();
         Principal principal = accessor.getUser();
 
-        StompSubscribePayload payload = StompSubscribePayload.of(USER_NOTIFICATION_DESTINATION, "구독 성공했습니다.");
+        NotificationPayload payload = NotificationPayload.fromStompSubscribeEvent(USER_NOTIFICATION_DESTINATION);
 
         if (USER_NOTIFICATION_DESTINATION.equals(destination) && principal != null) {
             messagingTemplate.convertAndSendToUser(
