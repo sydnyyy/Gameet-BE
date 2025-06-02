@@ -39,3 +39,7 @@ spring:
 jwt:
   issuer: ${JWT_ISSUER}
   secret_key: ${JWT_SECRET_KEY}
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: TRACE
