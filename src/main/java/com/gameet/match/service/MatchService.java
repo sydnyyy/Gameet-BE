@@ -10,6 +10,7 @@ import com.gameet.match.domain.MatchCondition;
 import com.gameet.match.dto.request.MatchAppointmentRequest;
 import com.gameet.match.dto.request.MatchConditionRequest;
 import com.gameet.match.dto.response.MatchAppointmentResponse;
+import com.gameet.match.dto.response.MatchStatusWithInfoResponse;
 import com.gameet.match.entity.*;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.mapper.MatchConditionMapper;
@@ -183,7 +184,23 @@ public class MatchService {
         cancelScheduledTask(userId);
     }
 
-    public MatchStatus getMatchStatus(Long userId) {
+    public MatchStatusWithInfoResponse getMatchStatusWithInfo(Long userId) {
+        switch (getMatchStatus(userId)) {
+            case SEARCHING -> {
+                Long elapsedTime = matchRepository.getElapsedTime(userId);
+                return new MatchStatusWithInfoResponse(MatchStatus.SEARCHING, elapsedTime, null);
+            }
+            case MATCHED -> {
+                Long matchRoomId = matchParticipantRepository.findMatchRoomIdByUserProfileId(userId);
+                return new MatchStatusWithInfoResponse(MatchStatus.MATCHED, null, matchRoomId);
+            }
+            default -> {
+                return new MatchStatusWithInfoResponse(MatchStatus.NONE, null, null);
+            }
+        }
+    }
+
+    private MatchStatus getMatchStatus(Long userId) {
         if (matchRepository.isMatchUserExists(userId)) {
             return MatchStatus.SEARCHING;
         }
