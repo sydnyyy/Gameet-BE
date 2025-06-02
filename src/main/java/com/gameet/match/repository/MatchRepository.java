@@ -58,6 +58,16 @@ public class MatchRepository {
         return score != null;
     }
 
+    public Long getElapsedTime(Long userId) {
+        Double score = redisTemplate.opsForZSet().score(MATCH_PREFIX, userId.toString());
+        if (score != null) {
+            long currentTime = System.currentTimeMillis();
+            return (currentTime - score.longValue()) / 1000;
+        }
+
+        return 0L;
+    }
+
     public Boolean tryLock(Long userId) {
         String token = UUID.randomUUID().toString();
         Boolean success = redisTemplate.opsForValue().setIfAbsent(getMatchLockKey(userId), token, Duration.ofSeconds(10));
