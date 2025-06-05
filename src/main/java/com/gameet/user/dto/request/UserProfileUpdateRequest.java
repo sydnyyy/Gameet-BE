@@ -12,6 +12,8 @@ import java.util.List;
 @Builder
 public record UserProfileUpdateRequest (
 
+        String password,
+
         String nickname,
         Integer age,
         Boolean showAge,
