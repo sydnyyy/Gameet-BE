@@ -59,6 +59,7 @@ public class UserService {
             throw new CustomException(ErrorCode.USER_PROFILE_NOT_FOUND);
         }
 
+        user.updatePassword(userProfileUpdateRequest.password());
         user.getUserProfile().update(userProfileUpdateRequest);
         return UserDetailsResponse.of(user);
     }
