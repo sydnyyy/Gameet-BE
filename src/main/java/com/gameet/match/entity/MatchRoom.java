@@ -1,11 +1,11 @@
 package com.gameet.match.entity;
 
 import com.gameet.common.entity.BaseTimeEntity;
+import com.gameet.match.dto.request.MatchRoomInsert;
 import com.gameet.match.enums.MatchStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,12 +28,21 @@ public class MatchRoom extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;
 
-    @Builder.Default
     @OneToMany(mappedBy = "matchRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MatchParticipant> matchParticipants = new ArrayList<>();
+    @Setter(AccessLevel.PRIVATE)
+    private List<MatchParticipant> matchParticipants;
 
-    public void addParticipant(MatchParticipant participant) {
-        matchParticipants.add(participant);
-        participant.setMatchRoom(this);
+    public static MatchRoom of(MatchRoomInsert insert) {
+        MatchRoom matchRoom = MatchRoom.builder()
+                .matchStatus(insert.matchStatus())
+                .build();
+
+        List<MatchParticipant> matchParticipants = insert.participants().stream()
+                .map(participant -> MatchParticipant.of(matchRoom, participant))
+                .toList();
+
+        matchRoom.setMatchParticipants(matchParticipants);
+
+        return matchRoom;
     }
 }

@@ -9,11 +9,14 @@ import com.gameet.match.annotation.MatchUserLockable;
 import com.gameet.match.domain.MatchCondition;
 import com.gameet.match.dto.request.MatchAppointmentRequest;
 import com.gameet.match.dto.request.MatchConditionRequest;
+import com.gameet.match.dto.request.MatchParticipantInsert;
+import com.gameet.match.dto.request.MatchRoomInsert;
 import com.gameet.match.dto.response.MatchAppointmentResponse;
 import com.gameet.match.dto.response.MatchStatusWithInfoResponse;
-import com.gameet.match.entity.*;
+import com.gameet.match.entity.MatchAppointment;
+import com.gameet.match.entity.MatchRoom;
 import com.gameet.match.enums.MatchStatus;
-import com.gameet.match.mapper.MatchConditionMapper;
+import com.gameet.match.mapper.MatchMapper;
 import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
@@ -47,6 +50,7 @@ public class MatchService {
     private final UserProfileRepository userProfileRepository;
     private final NotificationService notificationService;
     private final MatchAppointmentRepository matchAppointmentRepository;
+    private final MatchRoomService matchRoomService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
@@ -67,7 +71,7 @@ public class MatchService {
 
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        MatchCondition matchCondition = MatchConditionMapper.from(userProfile, matchConditionRequest);
+        MatchCondition matchCondition = MatchMapper.toMatchCondition(userProfile, matchConditionRequest);
 
         Set<Long> allMatchUsers = matchRepository.getAllMatchUsers();
 
@@ -83,11 +87,14 @@ public class MatchService {
 
                         cancelScheduledTask(otherMatchUserId);
 
-                        Map<Long, MatchCondition> userMatchCondition = new HashMap<>();
-                        userMatchCondition.put(userId, matchCondition);
-                        userMatchCondition.put(otherMatchUserId, otherMatchCondition);
+                        UserProfile otherUserProfile = userProfileRepository.getReferenceById(otherMatchUserId);
 
-                        Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
+                        List<MatchParticipantInsert> matchParticipantInserts = List.of(
+                                MatchMapper.toMatchParticipantInsert(userProfile, matchCondition),
+                                MatchMapper.toMatchParticipantInsert(otherUserProfile, otherMatchCondition)
+                        );
+
+                        Long matchRoomId = createMatchRoom(matchParticipantInserts);
                         notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED, matchRoomId);
 
                         return;
@@ -147,11 +154,15 @@ public class MatchService {
 
                         cancelScheduledTask(otherMatchUserId);
 
-                        Map<Long, MatchCondition> userMatchCondition = new HashMap<>();
-                        userMatchCondition.put(userId, matchCondition);
-                        userMatchCondition.put(otherMatchUserId, otherMatchCondition);
+                        UserProfile userProfile = userProfileRepository.getReferenceById(userId);
+                        UserProfile otherUserProfile = userProfileRepository.getReferenceById(otherMatchUserId);
 
-                        Long matchRoomId = createMatchRoom(List.of(userMatchCondition));
+                        List<MatchParticipantInsert> matchParticipantInserts = List.of(
+                                MatchMapper.toMatchParticipantInsert(userProfile, matchCondition),
+                                MatchMapper.toMatchParticipantInsert(otherUserProfile, otherMatchCondition)
+                        );
+
+                        Long matchRoomId = createMatchRoom(matchParticipantInserts);
                         notificationService.sendMatchResult(List.of(userId, otherMatchUserId), MatchStatus.MATCHED, matchRoomId);
 
                         return;
@@ -225,59 +236,14 @@ public class MatchService {
         }
     }
 
-    private Long createMatchRoom(List<Map<Long, MatchCondition>> userMatchConditions) {
-        MatchRoom matchRoom = MatchRoom.builder()
+    private Long createMatchRoom(List<MatchParticipantInsert> matchParticipantInsertList) {
+        MatchRoomInsert matchRoomInsert = MatchRoomInsert.builder()
                 .matchStatus(MatchStatus.MATCHED)
+                .participants(matchParticipantInsertList)
                 .build();
 
-        userMatchConditions.forEach(map -> {
-            map.forEach((userId, matchCondition) -> {
-                UserProfile userProfile = userProfileRepository.getReferenceById(userId);
-
-                MatchSuccessCondition matchSuccessCondition = MatchSuccessCondition.builder()
-                        .gameSkillLevel(matchCondition.getGameSkillLevel())
-                        .isAdultMatchAllowed(matchCondition.getIsAdultMatchAllowed())
-                        .isVoice(matchCondition.getIsVoice())
-                        .minMannerScore(matchCondition.getMinMannerScore())
-                        .playStyle(matchCondition.getPlayStyle())
-                        .build();
-
-                matchCondition.getGamePlatforms().forEach(gamePlatform -> {
-                    MatchSuccessGamePlatformId id = MatchSuccessGamePlatformId.builder()
-                            .gamePlatform(gamePlatform)
-                            .build();
-
-                    matchSuccessCondition.addMatchSuccessGamePlatform(
-                            MatchSuccessGamePlatform.builder()
-                                    .id(id)
-                                    .build()
-                    );
-                });
-
-                matchCondition.getPreferredGenres().forEach(preferredGenre -> {
-                    MatchSuccessPreferredGenreId id = MatchSuccessPreferredGenreId.builder()
-                            .preferredGenre(preferredGenre)
-                            .build();
-
-                    matchSuccessCondition.addMatchSuccessPreferredGenre(
-                            MatchSuccessPreferredGenre.builder()
-                                    .id(id)
-                                    .build()
-                    );
-                });
-
-                MatchParticipant matchParticipant = MatchParticipant.builder()
-                        .userProfile(userProfile)
-                        .build();
-
-                matchParticipant.setMatchSuccessCondition(matchSuccessCondition);
-
-                matchRoom.addParticipant(matchParticipant);
-            });
-        });
-
-        MatchRoom savedMatchRoom = matchRoomRepository.save(matchRoom);
-        return savedMatchRoom.getMatchRoomId();
+        MatchRoom matchRoom = matchRoomService.createMatchRoom(matchRoomInsert);
+        return matchRoom.getMatchRoomId();
     }
 
     private Map<String, String> convertMatchConditionToStringMap(MatchCondition matchCondition) {

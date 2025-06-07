@@ -1,5 +1,6 @@
 package com.gameet.match.entity;
 
+import com.gameet.common.enums.PreferredGenre;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,4 +20,11 @@ public class MatchSuccessPreferredGenre {
     @JoinColumn(name = "match_participant_id")
     @Setter(AccessLevel.PACKAGE)
     private MatchSuccessCondition matchSuccessCondition;
+
+    public static MatchSuccessPreferredGenre of(MatchSuccessCondition matchSuccessCondition, PreferredGenre preferredGenre) {
+        return MatchSuccessPreferredGenre.builder()
+                .id(MatchSuccessPreferredGenreId.of(preferredGenre))
+                .matchSuccessCondition(matchSuccessCondition)
+                .build();
+    }
 }

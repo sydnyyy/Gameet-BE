@@ -3,10 +3,10 @@ package com.gameet.match.entity;
 import com.gameet.common.entity.BaseTimeEntity;
 import com.gameet.common.enums.GameSkillLevel;
 import com.gameet.common.enums.PlayStyle;
+import com.gameet.match.dto.request.MatchSuccessConditionInsert;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,12 +28,12 @@ public class MatchSuccessCondition extends BaseTimeEntity {
     private MatchParticipant matchParticipant;
 
     @OneToMany(mappedBy = "matchSuccessCondition", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<MatchSuccessPreferredGenre> preferredGenres = new ArrayList<>();
+    @Setter(AccessLevel.PRIVATE)
+    private List<MatchSuccessPreferredGenre> preferredGenres;
 
     @OneToMany(mappedBy = "matchSuccessCondition", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<MatchSuccessGamePlatform> gamePlatforms = new ArrayList<>();
+    @Setter(AccessLevel.PRIVATE)
+    private List<MatchSuccessGamePlatform> gamePlatforms;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "game_skill_level")
@@ -52,13 +52,28 @@ public class MatchSuccessCondition extends BaseTimeEntity {
     @Column(name = "play_style")
     private PlayStyle playStyle;
 
-    public void addMatchSuccessPreferredGenre(MatchSuccessPreferredGenre matchSuccessPreferredGenre) {
-        preferredGenres.add(matchSuccessPreferredGenre);
-        matchSuccessPreferredGenre.setMatchSuccessCondition(this);
-    }
+    public static MatchSuccessCondition of(MatchParticipant matchParticipant, MatchSuccessConditionInsert insert) {
+        MatchSuccessCondition matchSuccessCondition = MatchSuccessCondition.builder()
+                .matchParticipant(matchParticipant)
+                .gameSkillLevel(insert.gameSkillLevel())
+                .isAdultMatchAllowed(insert.isAdultMatchAllowed())
+                .isVoice(insert.isVoice())
+                .minMannerScore(insert.minMannerScore())
+                .playStyle(insert.playStyle())
+                .build();
 
-    public void addMatchSuccessGamePlatform(MatchSuccessGamePlatform matchSuccessGamePlatform) {
-        gamePlatforms.add(matchSuccessGamePlatform);
-        matchSuccessGamePlatform.setMatchSuccessCondition(this);
+        List<MatchSuccessPreferredGenre> matchSuccessPreferredGenres = insert.preferredGenres().stream()
+                .map(genre -> MatchSuccessPreferredGenre.of(matchSuccessCondition, genre))
+                .toList();
+
+        matchSuccessCondition.setPreferredGenres(matchSuccessPreferredGenres);
+
+        List<MatchSuccessGamePlatform> matchSuccessGamePlatforms = insert.gamePlatforms().stream()
+                .map(gamePlatform -> MatchSuccessGamePlatform.of(matchSuccessCondition, gamePlatform))
+                .toList();
+
+        matchSuccessCondition.setGamePlatforms(matchSuccessGamePlatforms);
+
+        return matchSuccessCondition;
     }
 }
