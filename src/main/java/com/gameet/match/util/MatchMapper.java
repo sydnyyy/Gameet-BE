@@ -1,4 +1,4 @@
-package com.gameet.match.mapper;
+package com.gameet.match.util;
 
 import com.gameet.match.domain.MatchCondition;
 import com.gameet.match.dto.request.MatchConditionRequest;

@@ -16,7 +16,7 @@ import com.gameet.match.dto.response.MatchStatusWithInfoResponse;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.entity.MatchRoom;
 import com.gameet.match.enums.MatchStatus;
-import com.gameet.match.mapper.MatchMapper;
+import com.gameet.match.util.MatchMapper;
 import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
