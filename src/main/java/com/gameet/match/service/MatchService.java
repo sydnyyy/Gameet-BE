@@ -16,12 +16,12 @@ import com.gameet.match.dto.response.MatchStatusWithInfoResponse;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.entity.MatchRoom;
 import com.gameet.match.enums.MatchStatus;
-import com.gameet.match.util.MatchMapper;
 import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.match.repository.MatchRepository;
 import com.gameet.match.repository.MatchRoomRepository;
 import com.gameet.match.util.MatchConditionMatcher;
+import com.gameet.match.util.MatchMapper;
 import com.gameet.notification.service.NotificationService;
 import com.gameet.user.entity.UserProfile;
 import com.gameet.user.repository.UserProfileRepository;
@@ -50,7 +50,6 @@ public class MatchService {
     private final UserProfileRepository userProfileRepository;
     private final NotificationService notificationService;
     private final MatchAppointmentRepository matchAppointmentRepository;
-    private final MatchRoomService matchRoomService;
 
     private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
@@ -242,8 +241,10 @@ public class MatchService {
                 .participants(matchParticipantInsertList)
                 .build();
 
-        MatchRoom matchRoom = matchRoomService.createMatchRoom(matchRoomInsert);
-        return matchRoom.getMatchRoomId();
+        MatchRoom matchRoom = MatchRoom.of(matchRoomInsert);
+        MatchRoom saved = matchRoomRepository.save(matchRoom);
+
+        return saved.getMatchRoomId();
     }
 
     private Map<String, String> convertMatchConditionToStringMap(MatchCondition matchCondition) {
