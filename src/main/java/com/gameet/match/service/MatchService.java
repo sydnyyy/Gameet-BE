@@ -205,7 +205,7 @@ public class MatchService {
             return MatchStatus.SEARCHING;
         }
 
-        boolean isMatched = matchParticipantRepository.existsByMatchParticipantIdAndMatchRoom_matchStatus(userId, MatchStatus.MATCHED);
+        boolean isMatched = matchParticipantRepository.existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(userId, MatchStatus.MATCHED);
         if (isMatched) {
             return MatchStatus.MATCHED;
         }

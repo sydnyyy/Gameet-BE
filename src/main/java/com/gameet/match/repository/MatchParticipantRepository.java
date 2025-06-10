@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MatchParticipantRepository extends JpaRepository<MatchParticipant, Long> {
-    boolean existsByMatchParticipantIdAndMatchRoom_matchStatus(Long userId, MatchStatus matchStatus);
+    boolean existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(Long userId, MatchStatus matchStatus);
 
     @Query("""
         SELECT mp.userProfile.user.userId
