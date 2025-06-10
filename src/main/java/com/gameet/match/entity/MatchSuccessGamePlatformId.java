@@ -20,4 +20,10 @@ public class MatchSuccessGamePlatformId {
     @Column(name = "game_platform")
     @Enumerated(EnumType.STRING)
     private GamePlatform gamePlatform;
+
+    public static MatchSuccessGamePlatformId of(GamePlatform gamePlatform) {
+        return MatchSuccessGamePlatformId.builder()
+                .gamePlatform(gamePlatform)
+                .build();
+    }
 }

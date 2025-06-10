@@ -20,4 +20,10 @@ public class MatchSuccessPreferredGenreId {
     @Column(name = "preferred_genre")
     @Enumerated(EnumType.STRING)
     private PreferredGenre preferredGenre;
+
+    public static MatchSuccessPreferredGenreId of(PreferredGenre preferredGenre) {
+        return MatchSuccessPreferredGenreId.builder()
+                .preferredGenre(preferredGenre)
+                .build();
+    }
 }
