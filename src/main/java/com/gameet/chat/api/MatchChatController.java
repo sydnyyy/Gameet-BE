@@ -4,13 +4,7 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.gameet.chat.dto.ChatMessage;
 import com.gameet.chat.dto.MatchChatResponse;
@@ -47,5 +41,11 @@ public class MatchChatController {
     ) {
         OpponentProfileResponse response = matchChatService.getOpponentProfile(roomId, myProfileId);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{matchRoomId}/complete")
+    public ResponseEntity<Void> completeMatch(@PathVariable Long matchRoomId) {
+        matchChatService.completeMatch(matchRoomId);
+        return ResponseEntity.ok().build();
     }
 }
