@@ -5,6 +5,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.gameet.global.exception.CustomException;
+import com.gameet.global.exception.ErrorCode;
+import com.gameet.match.entity.MatchRoom;
+import com.gameet.match.enums.MatchStatus;
+import com.gameet.match.repository.MatchRoomRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +26,7 @@ import com.gameet.user.entity.UserProfile;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +34,7 @@ public class MatchChatService {
 
     private final MatchChatRepository matchChatRepository;
     private final MatchParticipantRepository matchParticipantRepository;
+    private final MatchRoomRepository matchRoomRepository;
 
     public MatchChatResponse saveChat(ChatMessage dto, Principal principal) {
         Long userId = Long.parseLong(principal.getName()); // User ID로 비교
@@ -112,5 +119,12 @@ public class MatchChatService {
                   .isAdultMatchAllowed(profile.getIsAdultMatchAllowed())
                   .isVoice(profile.getIsVoice())
                   .build();
+    }
+
+    @Transactional
+    public void completeMatch(Long matchRoomId) {
+        MatchRoom matchRoom = matchRoomRepository.findById(matchRoomId)
+                  .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_ROOM));
+        matchRoom.setMatchStatus(MatchStatus.COMPLETED);
     }
 }

@@ -36,4 +36,8 @@ public class MatchRoom extends BaseTimeEntity {
         matchParticipants.add(participant);
         participant.setMatchRoom(this);
     }
+
+    public void setMatchStatus(MatchStatus matchStatus) {
+        this.matchStatus = matchStatus;
+    }
 }
