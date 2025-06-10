@@ -5,21 +5,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.gameet.user.dto.response.UserDetailsResponse;
-import com.gameet.user.entity.User;
-import com.gameet.user.entity.UserProfile;
-import com.gameet.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.gameet.chat.dto.ChatMessage;
 import com.gameet.chat.dto.MatchChatResponse;
+import com.gameet.chat.dto.OpponentProfileResponse;
 import com.gameet.chat.entity.MatchChat;
 import com.gameet.chat.repository.MatchChatRepository;
 import com.gameet.match.entity.MatchParticipant;
 import com.gameet.match.repository.MatchParticipantRepository;
+import com.gameet.user.entity.UserGamePlatform;
+import com.gameet.user.entity.UserPreferredGenre;
+import com.gameet.user.entity.UserProfile;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,13 +30,11 @@ public class MatchChatService {
     private final MatchParticipantRepository matchParticipantRepository;
 
     public MatchChatResponse saveChat(ChatMessage dto, Principal principal) {
-        // match_participant_id 기반으로 엔티티 조회
+        Long userId = Long.parseLong(principal.getName()); // User ID로 비교
         MatchParticipant participant = matchParticipantRepository.findById(dto.getMatchParticipantId())
                   .orElseThrow(() -> new IllegalArgumentException("참가자를 찾을 수 없습니다."));
 
-        // principal 이름과 참가자 닉네임이 일치하는지 검증
-        String senderNickname = participant.getUserProfile().getNickname();
-        if (!senderNickname.equals(principal.getName())) {
+        if (!participant.getUserProfile().getUser().getUserId().equals(userId)) {
             throw new AccessDeniedException("본인의 메시지만 보낼 수 있습니다.");
         }
 
@@ -54,7 +52,6 @@ public class MatchChatService {
         return MatchChatResponse.builder()
                   .matchChatId(savedChat.getMatchChatId())
                   .matchRoomId(participant.getMatchRoom().getMatchRoomId())
-                  .nickname(senderNickname)
                   .messageType(savedChat.getMessageType())
                   .content(savedChat.getContent())
                   .sendAt(savedChat.getSendAt())
@@ -76,17 +73,6 @@ public class MatchChatService {
                   .collect(Collectors.toList());
     }
 
-    public UserDetailsResponse getOpponentInfo(Long roomId, Long myProfileId) {
-        MatchParticipant opponentParticipant = matchParticipantRepository
-                  .findOpponentByRoomIdAndMyProfileId(roomId, myProfileId)
-                  .orElseThrow(() -> new EntityNotFoundException("상대방을 찾을 수 없습니다."));
-
-        UserProfile opponentProfile = opponentParticipant.getUserProfile();
-        User opponentUser = opponentProfile.getUser();
-
-        return UserDetailsResponse.of(opponentUser);
-    }
-
     public void validateUserIdMatch(Long matchParticipantId, Long userIdFromPrincipal) {
         MatchParticipant participant = matchParticipantRepository.findById(matchParticipantId)
                   .orElseThrow(() -> new IllegalArgumentException("Invalid participant ID"));
@@ -98,4 +84,33 @@ public class MatchChatService {
         }
     }
 
+    public OpponentProfileResponse getOpponentProfile(Long roomId, Long myProfileId) {
+        MatchParticipant opponent = matchParticipantRepository
+                  .findOpponentProfileByRoomIdAndExcludeMyProfile(roomId, myProfileId)
+                  .orElseThrow(() -> new EntityNotFoundException("상대방을 찾을 수 없습니다."));
+
+        UserProfile profile = opponent.getUserProfile();
+
+        return OpponentProfileResponse.builder()
+                  .userProfileId(profile.getUserProfileId())
+                  .nickname(profile.getNickname())
+                  .age(profile.getAge())
+                  .showAge(profile.getShowAge())
+                  .gender(profile.getGender())
+                  .preferredGenres(
+                            profile.getPreferredGenres().stream()
+                                      .map(UserPreferredGenre::getPreferredGenre)
+                                      .collect(Collectors.toList())
+                  )
+                  .gamePlatforms(
+                            profile.getGamePlatforms().stream()
+                                      .map(UserGamePlatform::getGamePlatform)
+                                      .collect(Collectors.toList())
+                  )
+                  .playStyle(profile.getPlayStyle())
+                  .gameSkillLevel(profile.getGameSkillLevel())
+                  .isAdultMatchAllowed(profile.getIsAdultMatchAllowed())
+                  .isVoice(profile.getIsVoice())
+                  .build();
+    }
 }

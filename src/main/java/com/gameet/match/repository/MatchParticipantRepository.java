@@ -27,10 +27,14 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     """)
     Long findMatchRoomIdByUserProfileId(@Param("userProfileId") Long userProfileId);
 
-    @Query("SELECT mp FROM MatchParticipant mp " +
-              "WHERE mp.matchRoom.matchRoomId = :roomId " +
-              "AND mp.userProfile.userProfileId <> :myProfileId")
-    Optional<MatchParticipant> findOpponentByRoomIdAndMyProfileId(
+    @Query("""
+        SELECT mp
+        FROM MatchParticipant mp
+        JOIN FETCH mp.userProfile up
+        WHERE mp.matchRoom.matchRoomId = :roomId
+          AND up.userProfileId <> :myProfileId
+    """)
+    Optional<MatchParticipant> findOpponentProfileByRoomIdAndExcludeMyProfile(
               @Param("roomId") Long roomId,
               @Param("myProfileId") Long myProfileId
     );
