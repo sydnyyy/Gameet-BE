@@ -1,15 +1,21 @@
 package com.gameet.chat.dto;
 
-import com.gameet.chat.enums.MessageType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class ChatMessage {
-    private Long matchParticipantId;
-    private Long matchRoomId;
+    public enum MessageType {
+        ENTER, TALK, QUIT, APPOINTMENT
+    }
+
+    @JsonProperty("messageType")
     private MessageType messageType;
+
+    @JsonProperty("content")
     private String content;
+
+    @JsonProperty("matchParticipantId")
+    private Long matchParticipantId;
 }
