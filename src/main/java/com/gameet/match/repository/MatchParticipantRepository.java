@@ -38,4 +38,15 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
               @Param("roomId") Long roomId,
               @Param("myProfileId") Long myProfileId
     );
+
+    @Query("""
+        SELECT mp
+        FROM MatchParticipant mp
+        WHERE mp.matchRoom.matchRoomId = :roomId
+          AND mp.userProfile.user.userId = :userId
+    """)
+    Optional<MatchParticipant> findByMatchRoomIdAndUserId(
+              @Param("roomId") Long roomId,
+              @Param("userId") Long userId
+    );
 }

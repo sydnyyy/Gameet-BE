@@ -1,56 +1,38 @@
 package com.gameet.chat.api;
 
-import java.security.Principal;
-
-import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import com.gameet.chat.dto.ChatMessage;
-import com.gameet.chat.dto.MatchChatResponse;
-import com.gameet.chat.service.MatchChatService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.security.Principal;
+
+@Slf4j
 @Controller
 @RequiredArgsConstructor
-@Slf4j
 public class ChatMessageController {
 
-    private final MatchChatService matchChatService;
-    private final SimpMessagingTemplate messagingTemplate;
-
     @MessageMapping("/chat.send")
-    public void handleChat(ChatMessage message, Principal principal) {
+    @SendTo("/topic/chat.room.{matchRoomId}")
+    public ChatMessage sendMessage(ChatMessage message, SimpMessageHeaderAccessor accessor) {
         try {
-            Long userIdFromPrincipal = Long.parseLong(principal.getName());
+            Principal principal = accessor.getUser();
 
-            matchChatService.validateUserIdMatch(message.getMatchParticipantId(), userIdFromPrincipal);
-
-            MatchChatResponse response = matchChatService.saveChat(message, principal);
-            String destination = "/topic/chat.room." + response.getMatchRoomId();
-            messagingTemplate.convertAndSend(destination, response);
-        } catch (AccessDeniedException ade) {
-            try {
-                messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/errors", ade.getMessage());
-            } catch (Exception ex) {
-                log.error("Failed to send error message to user: " + principal.getName(), ex);
+            if (principal == null) {
+                log.warn("WebSocket 인증 실패: principal이 null입니다.");
+                throw new IllegalStateException("인증되지 않은 사용자입니다.");
             }
+
+            return message;
         } catch (Exception e) {
-            try {
-                messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/errors", e.getMessage());
-            } catch (Exception ex) {
-                log.error("Failed to send error message to user: " + principal.getName(), ex);
-            }
+            log.error("WebSocket 메시지 처리 중 오류 발생", e);
+            throw e;
         }
-    }
-
-    @MessageExceptionHandler
-    public void handleException(Throwable exception, Principal principal) {
-        messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/errors", exception.getMessage());
     }
 }
 
