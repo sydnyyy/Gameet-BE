@@ -49,5 +49,12 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
               @Param("roomId") Long roomId,
               @Param("userId") Long userId
     );
+
+    @Query("""
+        SELECT mp.matchRoom.matchRoomId
+        FROM MatchParticipant mp
+        WHERE mp.userProfile.userProfileId = :userProfileId
+          AND mp.matchRoom.matchStatus = :matchStatus
+    """)
     Long findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 }
