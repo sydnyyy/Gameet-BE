@@ -31,6 +31,10 @@ public class MatchParticipant extends BaseTimeEntity {
     @Setter(AccessLevel.PACKAGE)
     private MatchSuccessCondition matchSuccessCondition;
 
+    @OneToOne(mappedBy = "matchParticipant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Setter(AccessLevel.PACKAGE)
+    private MatchMannerEvaluationLog matchMannerEvaluationLog;
+
     public static MatchParticipant of(MatchRoom matchRoom, MatchParticipantInsert insert) {
         MatchParticipant matchParticipant = MatchParticipant.builder()
                 .matchRoom(matchRoom)
