@@ -2,7 +2,6 @@ package com.gameet.chat.api;
 
 import com.gameet.chat.service.MatchChatService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
