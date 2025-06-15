@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MatchParticipantRepository extends JpaRepository<MatchParticipant, Long> {
     boolean existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
@@ -24,5 +25,29 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
         WHERE mp.userProfile.userProfileId = :userProfileId
           AND mp.matchRoom.matchStatus = :matchStatus
     """)
+    Long findMatchRoomIdByUserProfileId(@Param("userProfileId") Long userProfileId);
+
+    @Query("""
+        SELECT mp
+        FROM MatchParticipant mp
+        JOIN FETCH mp.userProfile up
+        WHERE mp.matchRoom.matchRoomId = :roomId
+          AND up.userProfileId <> :myProfileId
+    """)
+    Optional<MatchParticipant> findOpponentProfileByRoomIdAndExcludeMyProfile(
+              @Param("roomId") Long roomId,
+              @Param("myProfileId") Long myProfileId
+    );
+
+    @Query("""
+        SELECT mp
+        FROM MatchParticipant mp
+        WHERE mp.matchRoom.matchRoomId = :roomId
+          AND mp.userProfile.user.userId = :userId
+    """)
+    Optional<MatchParticipant> findByMatchRoomIdAndUserId(
+              @Param("roomId") Long roomId,
+              @Param("userId") Long userId
+    );
     Long findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 }

@@ -39,4 +39,6 @@ jwt:
 
 logging:
   level:
-    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.web: DEBUG
