@@ -9,8 +9,8 @@ import com.gameet.match.annotation.MatchUserLockable;
 import com.gameet.match.domain.MatchCondition;
 import com.gameet.match.dto.request.MatchAppointmentRequest;
 import com.gameet.match.dto.request.MatchConditionRequest;
-import com.gameet.match.dto.request.MatchParticipantInsert;
-import com.gameet.match.dto.request.MatchRoomInsert;
+import com.gameet.match.dto.insert.MatchParticipantInsert;
+import com.gameet.match.dto.insert.MatchRoomInsert;
 import com.gameet.match.dto.response.MatchAppointmentResponse;
 import com.gameet.match.dto.response.MatchStatusWithInfoResponse;
 import com.gameet.match.entity.MatchAppointment;
@@ -201,8 +201,12 @@ public class MatchService {
                 return new MatchStatusWithInfoResponse(MatchStatus.SEARCHING, elapsedTime, null);
             }
             case MATCHED -> {
-                Long matchRoomId = matchParticipantRepository.findMatchRoomIdByUserProfileId(userId);
+                Long matchRoomId = matchParticipantRepository.findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(userId, MatchStatus.MATCHED);
                 return new MatchStatusWithInfoResponse(MatchStatus.MATCHED, null, matchRoomId);
+            }
+            case COMPLETED -> {
+                Long matchRoomId = matchParticipantRepository.findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(userId, MatchStatus.COMPLETED);
+                return new MatchStatusWithInfoResponse(MatchStatus.COMPLETED, null, matchRoomId);
             }
             default -> {
                 return new MatchStatusWithInfoResponse(MatchStatus.NONE, null, null);

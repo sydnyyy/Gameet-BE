@@ -2,8 +2,8 @@ package com.gameet.match.util;
 
 import com.gameet.match.domain.MatchCondition;
 import com.gameet.match.dto.request.MatchConditionRequest;
-import com.gameet.match.dto.request.MatchParticipantInsert;
-import com.gameet.match.dto.request.MatchSuccessConditionInsert;
+import com.gameet.match.dto.insert.MatchParticipantInsert;
+import com.gameet.match.dto.insert.MatchSuccessConditionInsert;
 import com.gameet.user.entity.UserProfile;
 import lombok.experimental.UtilityClass;
 

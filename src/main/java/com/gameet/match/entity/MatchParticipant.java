@@ -1,7 +1,7 @@
 package com.gameet.match.entity;
 
 import com.gameet.common.entity.BaseTimeEntity;
-import com.gameet.match.dto.request.MatchParticipantInsert;
+import com.gameet.match.dto.insert.MatchParticipantInsert;
 import com.gameet.user.entity.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;

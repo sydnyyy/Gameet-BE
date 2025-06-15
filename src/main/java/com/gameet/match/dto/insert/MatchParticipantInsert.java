@@ -1,4 +1,4 @@
-package com.gameet.match.dto.request;
+package com.gameet.match.dto.insert;
 
 import com.gameet.user.entity.UserProfile;
 import lombok.Builder;
