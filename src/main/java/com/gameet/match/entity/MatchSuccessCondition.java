@@ -3,7 +3,7 @@ package com.gameet.match.entity;
 import com.gameet.common.entity.BaseTimeEntity;
 import com.gameet.common.enums.GameSkillLevel;
 import com.gameet.common.enums.PlayStyle;
-import com.gameet.match.dto.request.MatchSuccessConditionInsert;
+import com.gameet.match.dto.insert.MatchSuccessConditionInsert;
 import jakarta.persistence.*;
 import lombok.*;
 

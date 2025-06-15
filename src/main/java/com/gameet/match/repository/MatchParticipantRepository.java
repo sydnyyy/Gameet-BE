@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MatchParticipantRepository extends JpaRepository<MatchParticipant, Long> {
-    boolean existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(Long userId, MatchStatus matchStatus);
+    boolean existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 
     @Query("""
         SELECT mp.userProfile.user.userId
@@ -22,7 +22,7 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
         SELECT mp.matchRoom.matchRoomId
         FROM MatchParticipant mp
         WHERE mp.userProfile.userProfileId = :userProfileId
-          AND mp.matchRoom.matchStatus = 'MATCHED'
+          AND mp.matchRoom.matchStatus = :matchStatus
     """)
-    Long findMatchRoomIdByUserProfileId(@Param("userProfileId") Long userProfileId);
+    Long findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 }
