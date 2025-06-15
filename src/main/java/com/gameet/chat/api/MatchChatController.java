@@ -5,7 +5,6 @@ import java.security.Principal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.gameet.chat.dto.OpponentProfileResponse;
 import com.gameet.chat.service.MatchChatService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,15 +21,6 @@ public class MatchChatController {
         Long userId = Long.parseLong(principal.getName());
         Long participantId = matchChatService.getMyParticipantId(roomId, userId);
         return ResponseEntity.ok(participantId);
-    }
-
-    @GetMapping("/opponent/{roomId}/{myProfileId}")
-    public ResponseEntity<OpponentProfileResponse> getOpponentProfile(
-        @PathVariable Long roomId,
-        @PathVariable Long myProfileId
-    ) {
-        OpponentProfileResponse response = matchChatService.getOpponentProfile(roomId, myProfileId);
-        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{matchRoomId}/complete")

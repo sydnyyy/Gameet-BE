@@ -1,8 +1,9 @@
 package com.gameet.chat.api;
 
+import com.gameet.chat.service.MatchChatService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.gameet.chat.dto.ChatMessage;
@@ -17,22 +18,25 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class ChatMessageController {
 
+    private final SimpMessagingTemplate messagingTemplate;
+    private final MatchChatService matchChatService;
+
     @MessageMapping("/chat.send")
-    @SendTo("/topic/chat.room.{matchRoomId}")
-    public ChatMessage sendMessage(ChatMessage message, SimpMessageHeaderAccessor accessor) {
-        try {
-            Principal principal = accessor.getUser();
-
-            if (principal == null) {
-                log.warn("WebSocket 인증 실패: principal이 null입니다.");
-                throw new IllegalStateException("인증되지 않은 사용자입니다.");
-            }
-
-            return message;
-        } catch (Exception e) {
-            log.error("WebSocket 메시지 처리 중 오류 발생", e);
-            throw e;
+    public void sendMessage(ChatMessage message, Principal principal) {
+        if (principal == null) {
+            log.warn("WebSocket 인증 실패: principal == null");
+            throw new IllegalStateException("인증되지 않은 사용자입니다.");
         }
+
+        // participantId로부터 roomId 찾기
+        Long matchRoomId = matchChatService.getMatchRoomIdByParticipantId(message.getMatchParticipantId());
+        log.info("📤 메시지 전송 - roomId={}, participantId={}, content={}",
+                  matchRoomId, message.getMatchParticipantId(), message.getContent());
+
+        // 메시지 전송
+        messagingTemplate.convertAndSend(
+                  "/topic/chat.room." + matchRoomId,
+                  message
+        );
     }
 }
-

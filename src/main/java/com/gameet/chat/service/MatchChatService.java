@@ -9,12 +9,8 @@ import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.repository.MatchRoomRepository;
 import org.springframework.stereotype.Service;
 
-import com.gameet.chat.dto.OpponentProfileResponse;
 import com.gameet.match.entity.MatchParticipant;
 import com.gameet.match.repository.MatchParticipantRepository;
-import com.gameet.user.entity.UserGamePlatform;
-import com.gameet.user.entity.UserPreferredGenre;
-import com.gameet.user.entity.UserProfile;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,34 +31,11 @@ public class MatchChatService {
         return participant.getMatchParticipantId();
     }
 
-    public OpponentProfileResponse getOpponentProfile(Long roomId, Long myProfileId) {
-        MatchParticipant opponent = matchParticipantRepository
-                  .findOpponentProfileByRoomIdAndExcludeMyProfile(roomId, myProfileId)
-                  .orElseThrow(() -> new EntityNotFoundException("상대방을 찾을 수 없습니다."));
+    public Long getMatchRoomIdByParticipantId(Long matchParticipantId) {
+        MatchParticipant participant = matchParticipantRepository.findById(matchParticipantId)
+                  .orElseThrow(() -> new EntityNotFoundException("참가자를 찾을 수 없습니다."));
 
-        UserProfile profile = opponent.getUserProfile();
-
-        return OpponentProfileResponse.builder()
-                  .userProfileId(profile.getUserProfileId())
-                  .nickname(profile.getNickname())
-                  .age(profile.getAge())
-                  .showAge(profile.getShowAge())
-                  .gender(profile.getGender())
-                  .preferredGenres(
-                            profile.getPreferredGenres().stream()
-                                      .map(UserPreferredGenre::getPreferredGenre)
-                                      .collect(Collectors.toList())
-                  )
-                  .gamePlatforms(
-                            profile.getGamePlatforms().stream()
-                                      .map(UserGamePlatform::getGamePlatform)
-                                      .collect(Collectors.toList())
-                  )
-                  .playStyle(profile.getPlayStyle())
-                  .gameSkillLevel(profile.getGameSkillLevel())
-                  .isAdultMatchAllowed(profile.getIsAdultMatchAllowed())
-                  .isVoice(profile.getIsVoice())
-                  .build();
+        return participant.getMatchRoom().getMatchRoomId();
     }
 
     @Transactional
