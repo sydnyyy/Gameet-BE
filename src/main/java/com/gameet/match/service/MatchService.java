@@ -218,10 +218,13 @@ public class MatchService {
         if (matchRepository.isMatchUserExists(userId)) {
             return MatchStatus.SEARCHING;
         }
-
         boolean isMatched = matchParticipantRepository.existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(userId, MatchStatus.MATCHED);
         if (isMatched) {
             return MatchStatus.MATCHED;
+        }
+        boolean isCompleted = matchParticipantRepository.existsByUserProfile_userProfileIdAndMatchRoom_matchStatusAndMatchMannerEvaluationLog(userId, MatchStatus.COMPLETED);
+        if (isCompleted) {
+            return MatchStatus.COMPLETED;
         }
 
         return MatchStatus.NONE;
