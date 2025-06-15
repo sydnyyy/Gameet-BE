@@ -18,6 +18,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MatchChatService {
@@ -41,6 +43,21 @@ public class MatchChatService {
 
         return matchChatRepository.save(chat);
     }
+
+    public List<ChatMessage> getChatMessagesByRoomId(Long matchRoomId) {
+        List<MatchChat> chats = matchChatRepository.findByMatchRoomId(matchRoomId);
+
+        return chats.stream().map(chat -> {
+            MatchParticipant participant = chat.getMatchParticipant();
+            return ChatMessage.builder()
+                      .messageType(chat.getMessageType())
+                      .content(chat.getContent())
+                      .matchParticipantId(participant.getMatchParticipantId())
+                      .sendAt(chat.getSendAt())
+                      .build();
+        }).toList();
+    }
+
 
 
     public ParticipantInfoResponse getMyParticipantInfo(Long roomId, Long userId) {
