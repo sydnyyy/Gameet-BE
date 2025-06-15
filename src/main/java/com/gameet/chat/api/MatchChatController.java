@@ -2,6 +2,7 @@ package com.gameet.chat.api;
 
 import java.security.Principal;
 
+import com.gameet.chat.dto.ParticipantInfoResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +18,10 @@ public class MatchChatController {
     private final MatchChatService matchChatService;
 
     @GetMapping("/participantId/{roomId}")
-    public ResponseEntity<Long> getMyParticipantId(@PathVariable Long roomId, Principal principal) {
+    public ResponseEntity<ParticipantInfoResponse> getMyParticipantInfo(@PathVariable Long roomId, Principal principal) {
         Long userId = Long.parseLong(principal.getName());
-        Long participantId = matchChatService.getMyParticipantId(roomId, userId);
-        return ResponseEntity.ok(participantId);
+        ParticipantInfoResponse info = matchChatService.getMyParticipantInfo(roomId, userId);
+        return ResponseEntity.ok(info);
     }
 
     @PatchMapping("/{matchRoomId}/complete")

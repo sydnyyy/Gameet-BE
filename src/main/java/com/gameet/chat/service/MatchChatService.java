@@ -1,6 +1,7 @@
 package com.gameet.chat.service;
 
 import com.gameet.chat.dto.ChatMessage;
+import com.gameet.chat.dto.ParticipantInfoResponse;
 import com.gameet.chat.entity.MatchChat;
 import com.gameet.chat.repository.MatchChatRepository;
 import com.gameet.global.exception.CustomException;
@@ -42,13 +43,17 @@ public class MatchChatService {
     }
 
 
-    public Long getMyParticipantId(Long roomId, Long userId) {
+    public ParticipantInfoResponse getMyParticipantInfo(Long roomId, Long userId) {
         MatchParticipant participant = matchParticipantRepository
                   .findByMatchRoomIdAndUserId(roomId, userId)
                   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT));
 
-        return participant.getMatchParticipantId();
+        return new ParticipantInfoResponse(
+                  participant.getMatchParticipantId(),
+                  participant.getUserProfile().getUserProfileId()
+        );
     }
+
 
     public Long getMatchRoomIdByParticipantId(Long matchParticipantId) {
         MatchParticipant participant = matchParticipantRepository.findById(matchParticipantId)
