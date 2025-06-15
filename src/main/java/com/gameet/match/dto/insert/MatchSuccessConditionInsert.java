@@ -1,4 +1,4 @@
-package com.gameet.match.dto.request;
+package com.gameet.match.dto.insert;
 
 import com.gameet.common.enums.GamePlatform;
 import com.gameet.common.enums.GameSkillLevel;

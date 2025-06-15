@@ -102,6 +102,10 @@ public class UserProfile extends BaseTimeEntity {
         return userProfile;
     }
 
+    public void updateMannerScore(Integer newScore) {
+        updateIfChanged(newScore, this.mannerScore, this::setMannerScore);
+    }
+
     public void update(UserProfileUpdateRequest request) {
         updateIfChanged(request.nickname(), this.nickname, this::setNickname);
         updateIfChanged(request.age(), this.age, this::setAge);
