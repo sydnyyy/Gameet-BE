@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Controller
@@ -28,10 +29,13 @@ public class ChatMessageController {
             throw new IllegalStateException("인증되지 않은 사용자입니다.");
         }
 
-        // participantId로부터 roomId 찾기
         Long matchRoomId = matchChatService.getMatchRoomIdByParticipantId(message.getMatchParticipantId());
-        log.info("📤 메시지 전송 - roomId={}, participantId={}, content={}",
-                  matchRoomId, message.getMatchParticipantId(), message.getContent());
+        message.setSendAt(LocalDateTime.now());
+
+        matchChatService.saveChat(message);
+
+        log.info("메시지 전송 - roomId={}, participantId={}, content={}, sendAt={}",
+                  matchRoomId, message.getMatchParticipantId(), message.getContent(), message.getSendAt());
 
         // 메시지 전송
         messagingTemplate.convertAndSend(

@@ -1,7 +1,8 @@
 package com.gameet.chat.service;
 
-import java.util.stream.Collectors;
-
+import com.gameet.chat.dto.ChatMessage;
+import com.gameet.chat.entity.MatchChat;
+import com.gameet.chat.repository.MatchChatRepository;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.entity.MatchRoom;
@@ -22,6 +23,24 @@ public class MatchChatService {
 
     private final MatchParticipantRepository matchParticipantRepository;
     private final MatchRoomRepository matchRoomRepository;
+    private final MatchChatRepository matchChatRepository;
+
+    @Transactional
+    public MatchChat saveChat(ChatMessage message) {
+        MatchParticipant participant = matchParticipantRepository
+                  .findById(message.getMatchParticipantId())
+                  .orElseThrow(() -> new EntityNotFoundException("참가자를 찾을 수 없습니다."));
+
+        MatchChat chat = MatchChat.builder()
+                  .matchParticipant(participant)
+                  .messageType(message.getMessageType())
+                  .content(message.getContent())
+                  .sendAt(message.getSendAt())
+                  .build();
+
+        return matchChatRepository.save(chat);
+    }
+
 
     public Long getMyParticipantId(Long roomId, Long userId) {
         MatchParticipant participant = matchParticipantRepository
