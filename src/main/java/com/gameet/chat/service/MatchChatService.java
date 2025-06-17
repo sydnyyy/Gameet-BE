@@ -1,7 +1,7 @@
 package com.gameet.chat.service;
 
 import com.gameet.chat.dto.ChatMessage;
-import com.gameet.chat.dto.ParticipantInfoResponse;
+import com.gameet.chat.dto.MatchParticipantsInfoResponse;
 import com.gameet.chat.entity.MatchChat;
 import com.gameet.chat.repository.MatchChatRepository;
 import com.gameet.global.exception.CustomException;
@@ -58,20 +58,6 @@ public class MatchChatService {
         }).toList();
     }
 
-
-
-    public ParticipantInfoResponse getMyParticipantInfo(Long roomId, Long userId) {
-        MatchParticipant participant = matchParticipantRepository
-                  .findByMatchRoomIdAndUserId(roomId, userId)
-                  .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARTICIPANT));
-
-        return new ParticipantInfoResponse(
-                  participant.getMatchParticipantId(),
-                  participant.getUserProfile().getUserProfileId()
-        );
-    }
-
-
     public Long getMatchRoomIdByParticipantId(Long matchParticipantId) {
         MatchParticipant participant = matchParticipantRepository.findById(matchParticipantId)
                   .orElseThrow(() -> new EntityNotFoundException("참가자를 찾을 수 없습니다."));
@@ -84,5 +70,13 @@ public class MatchChatService {
         MatchRoom matchRoom = matchRoomRepository.findById(matchRoomId)
                   .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_ROOM));
         matchRoom.setMatchStatus(MatchStatus.COMPLETED);
+    }
+
+    @Transactional
+    public MatchParticipantsInfoResponse getMatchParticipantsInfo(Long matchRoomId, Long userId) {
+        List<MatchParticipant> matchParticipants = matchParticipantRepository.findByMatchRoom_matchRoomId(matchRoomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT));
+
+        return MatchParticipantsInfoResponse.of(matchParticipants, userId);
     }
 }

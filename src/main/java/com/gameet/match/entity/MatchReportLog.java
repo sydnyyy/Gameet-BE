@@ -19,7 +19,6 @@ public class MatchReportLog extends BaseTimeEntity {
     @MapsId("matchParticipantId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_participant_id")
-    @Setter(AccessLevel.PACKAGE)
     private MatchParticipant matchParticipant;
 
     public static MatchReportLog of(MatchReportLogInsert insert) {
