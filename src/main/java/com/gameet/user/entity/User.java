@@ -1,10 +1,11 @@
 package com.gameet.user.entity;
 
+import com.gameet.common.util.PasswordUtil;
+import com.gameet.global.exception.CustomException;
+import com.gameet.global.exception.ErrorCode;
 import com.gameet.user.dto.request.SignUpRequest;
 import com.gameet.user.enums.Role;
 import com.gameet.common.entity.BaseTimeEntity;
-import com.gameet.global.exception.CustomException;
-import com.gameet.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,12 +39,12 @@ public class User extends BaseTimeEntity {
         return User.builder()
                 .role(role)
                 .email(request.email())
-                .password(request.password())
+                .password(PasswordUtil.encode(request.password()))
                 .build();
     }
 
     public void verifyPasswordMatching(String requestedPassword) {
-        if (!password.equals(requestedPassword)) {
+        if (!PasswordUtil.matches(requestedPassword, this.password)) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
     }
@@ -53,6 +54,6 @@ public class User extends BaseTimeEntity {
     }
 
     public void updatePassword(String newPassword) {
-        this.password = newPassword;
+        this.password = PasswordUtil.encode(newPassword);
     }
 }
