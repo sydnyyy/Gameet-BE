@@ -21,7 +21,6 @@ public class MatchMannerEvaluationLog extends BaseTimeEntity {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_participant_id")
-    @Setter(AccessLevel.PACKAGE)
     private MatchParticipant matchParticipant;
 
     @Column(name = "manner_evaluation")
