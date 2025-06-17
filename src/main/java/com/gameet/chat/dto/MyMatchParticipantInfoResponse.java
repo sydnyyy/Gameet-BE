@@ -2,6 +2,7 @@ package com.gameet.chat.dto;
 
 import com.gameet.match.entity.MatchParticipant;
 import lombok.Builder;
+import org.springframework.util.CollectionUtils;
 
 @Builder
 public record MyMatchParticipantInfoResponse (
@@ -11,7 +12,7 @@ public record MyMatchParticipantInfoResponse (
     public static MyMatchParticipantInfoResponse of(MatchParticipant matchParticipant) {
         return MyMatchParticipantInfoResponse.builder()
                 .matchParticipantId(matchParticipant.getMatchParticipantId())
-                .isReported(matchParticipant.getMatchReportLog() != null)
+                .isReported(!CollectionUtils.isEmpty(matchParticipant.getMatchReportLog()))
                 .build();
     }
 }
