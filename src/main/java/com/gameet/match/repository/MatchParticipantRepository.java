@@ -13,11 +13,12 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     boolean existsByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 
     @Query("""
-        SELECT CASE WHEN COUNT(mp) > 0 THEN false ELSE true END
+        SELECT count(*) > 0
         FROM MatchParticipant mp
-        JOIN mp.matchMannerEvaluationLog mmel
+        LEFT JOIN mp.matchMannerEvaluationLog mmel
         WHERE mp.userProfile.userProfileId = :userProfileId
-        AND mp.matchRoom.matchStatus = :matchStatus
+          AND mp.matchRoom.matchStatus = :matchStatus
+          AND mp.matchMannerEvaluationLog is null
     """)
     boolean existsByUserProfile_userProfileIdAndMatchRoom_matchStatusAndMatchMannerEvaluationLog(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 
@@ -64,6 +65,8 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
         FROM MatchParticipant mp
         WHERE mp.userProfile.userProfileId = :userProfileId
           AND mp.matchRoom.matchStatus = :matchStatus
+        ORDER BY mp.matchRoom.matchRoomId DESC
+        LIMIT 1
     """)
     Long findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 }

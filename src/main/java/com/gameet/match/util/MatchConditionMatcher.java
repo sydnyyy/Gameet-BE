@@ -59,11 +59,11 @@ public class MatchConditionMatcher {
             return true;
         }
 
-        if (isAdultMatchAllowedA && ageB < 20) {
+        if (!isAdultMatchAllowedA && ageB < 20) {
             return false;
         }
 
-        if (isAdultMatchAllowedB && ageA < 20) {
+        if (!isAdultMatchAllowedB && ageA < 20) {
             return false;
         }
 
