@@ -35,7 +35,7 @@ public class MatchChatController {
             @ApiResponse(responseCode = "200", description = "매칭 참가자 정보 조회", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "매칭 참여자가 존재하지 않습니다.", content = @Content(schema = @Schema(implementation = String.class))),
     })
-    @AccessLoggable(action = "공통 코드 조회")
+    @AccessLoggable(action = "매칭 참가자 정보 조회")
     @GetMapping("/{matchRoomId}/participantsInfo")
     public ResponseEntity<MatchParticipantsInfoResponse> getParticipants(@PathVariable Long matchRoomId,
                                                                          @AuthenticationPrincipal UserPrincipal userPrincipal) {
