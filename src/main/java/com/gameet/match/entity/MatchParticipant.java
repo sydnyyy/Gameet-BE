@@ -6,6 +6,8 @@ import com.gameet.user.entity.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -34,6 +36,9 @@ public class MatchParticipant extends BaseTimeEntity {
     @OneToOne(mappedBy = "matchParticipant", cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter(AccessLevel.PACKAGE)
     private MatchMannerEvaluationLog matchMannerEvaluationLog;
+
+    @OneToMany(mappedBy = "matchParticipant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchReportLog> matchReportLog;
 
     public static MatchParticipant of(MatchRoom matchRoom, MatchParticipantInsert insert) {
         MatchParticipant matchParticipant = MatchParticipant.builder()
