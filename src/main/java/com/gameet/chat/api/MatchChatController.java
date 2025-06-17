@@ -1,16 +1,15 @@
 package com.gameet.chat.api;
 
-import java.security.Principal;
-import java.util.List;
-
 import com.gameet.chat.dto.ChatMessage;
-import com.gameet.chat.dto.ParticipantInfoResponse;
+import com.gameet.chat.dto.MatchParticipantsInfoResponse;
+import com.gameet.chat.service.MatchChatService;
+import com.gameet.global.dto.UserPrincipal;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.gameet.chat.service.MatchChatService;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -25,11 +24,11 @@ public class MatchChatController {
         return ResponseEntity.ok(messages);
     }
 
-    @GetMapping("/participantId/{roomId}")
-    public ResponseEntity<ParticipantInfoResponse> getMyParticipantInfo(@PathVariable Long roomId, Principal principal) {
-        Long userId = Long.parseLong(principal.getName());
-        ParticipantInfoResponse info = matchChatService.getMyParticipantInfo(roomId, userId);
-        return ResponseEntity.ok(info);
+    @GetMapping("/{matchRoomId}/participantsInfo")
+    public ResponseEntity<MatchParticipantsInfoResponse> getParticipants(@PathVariable Long matchRoomId,
+                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        MatchParticipantsInfoResponse matchParticipantsInfo = matchChatService.getMatchParticipantsInfo(matchRoomId, userPrincipal.getUserId());
+        return ResponseEntity.ok(matchParticipantsInfo);
     }
 
     @PatchMapping("/{matchRoomId}/complete")
