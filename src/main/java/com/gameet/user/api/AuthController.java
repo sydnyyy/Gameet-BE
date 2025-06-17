@@ -166,6 +166,10 @@ public class AuthController {
         return ResponseEntity.ok("액세스 토큰 재발급 성공");
     }
 
+    @Operation(summary = "웹소켓 토큰 발급")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "웹소켓 토큰 발급 성공", content = @Content(schema = @Schema(implementation = String.class))),
+    })
     @AccessLoggable(action = "웹소켓 토큰 발급")
     @GetMapping("/token/websocket")
     public ResponseEntity<?> getWebSocketToken(@AuthenticationPrincipal UserPrincipal userPrincipal,
