@@ -11,6 +11,7 @@ import com.gameet.match.entity.MatchRoom;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.repository.MatchRoomRepository;
 import com.gameet.notification.dto.NotificationPayload;
+import com.gameet.notification.service.NotificationService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class MatchChatService {
     private final MatchRoomRepository matchRoomRepository;
     private final MatchChatRepository matchChatRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @Transactional
     public MatchChat saveChat(ChatMessage message) {
@@ -45,7 +47,22 @@ public class MatchChatService {
                   .sendAt(message.getSendAt())
                   .build();
 
-        return matchChatRepository.save(chat);
+        MatchChat savedChat = matchChatRepository.save(chat);
+
+        // 알림 보낼 대상 식별
+        MatchRoom room = sender.getMatchRoom();
+        List<MatchParticipant> participants = room.getMatchParticipants();
+
+        for (MatchParticipant participant : participants) {
+            Long receiverId = participant.getUserProfile().getUserProfileId();
+
+            // 본인은 제외
+            if (!participant.getMatchParticipantId().equals(sender.getMatchParticipantId())) {
+                notificationService.sendChatNotification(receiverId, room.getMatchRoomId());
+            }
+        }
+
+        return savedChat;
     }
 
     public List<ChatMessage> getChatMessagesByRoomId(Long matchRoomId) {

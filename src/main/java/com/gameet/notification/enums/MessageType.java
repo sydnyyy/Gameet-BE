@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 public enum MessageType {
 
     MATCH_RESULT("매칭 결과"),
+    CHAT("채팅"),
     MATCH_APPOINTMENT("매칭 약속"),
     STOMP_SUBSCRIBE("STOMP 구독")
     ;

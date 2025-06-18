@@ -46,6 +46,11 @@ public class NotificationService {
                 });
     }
 
+    public void sendChatNotification(Long receiverUserId, Long matchRoomId) {
+        NotificationPayload payload = NotificationPayload.fromMatchChat(matchRoomId);
+        sendWebNotification(receiverUserId, payload);
+    }
+
     private void sendWebNotification(Long userId, NotificationPayload payload) {
         simpMessagingTemplate.convertAndSendToUser(
                 String.valueOf(userId),
