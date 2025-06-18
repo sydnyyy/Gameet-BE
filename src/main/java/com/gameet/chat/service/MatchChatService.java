@@ -36,12 +36,12 @@ public class MatchChatService {
 
     @Transactional
     public MatchChat saveChat(ChatMessage message) {
-        MatchParticipant participant = matchParticipantRepository
+        MatchParticipant sender = matchParticipantRepository
                   .findById(message.getMatchParticipantId())
                   .orElseThrow(() -> new EntityNotFoundException("참가자를 찾을 수 없습니다."));
 
         MatchChat chat = MatchChat.builder()
-                  .matchParticipant(participant)
+                  .matchParticipant(sender)
                   .messageType(message.getMessageType())
                   .content(message.getContent())
                   .sendAt(message.getSendAt())
