@@ -6,9 +6,6 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
     open-in-view: false
 
   datasource:
@@ -16,3 +13,32 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}
+
+logging:
+  level:
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.web: DEBUG
