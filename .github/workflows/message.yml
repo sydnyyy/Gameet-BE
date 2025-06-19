@@ -68,5 +68,6 @@ jobs:
               --name gameet-container \
               --network gameet-net \
               --env-file /home/ubuntu/.env \
+              -e REDIS_HOST=redis-gameet \
               -p 8080:8080 \
               $IMAGE_NAME
