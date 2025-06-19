@@ -2,6 +2,7 @@ package com.gameet.chat.service;
 
 import com.gameet.chat.dto.ChatMessage;
 import com.gameet.chat.dto.MatchParticipantsInfoResponse;
+import com.gameet.chat.dto.UnreadChatResponse;
 import com.gameet.chat.entity.MatchChat;
 import com.gameet.notification.enums.MessageType;
 import com.gameet.chat.repository.MatchChatRepository;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -124,4 +126,18 @@ public class MatchChatService {
 
         participant.setLastReadAtNow();
     }
+
+    public long getUnreadCount(Long userProfileId) {
+        MatchParticipant participant = matchParticipantRepository
+                  .findMatchedParticipantByUserProfileId(userProfileId)
+                  .orElseThrow(() -> new EntityNotFoundException("매칭된 참가자를 찾을 수 없습니다."));
+
+        Long participantId = participant.getMatchParticipantId();
+        Long roomId = participant.getMatchRoom().getMatchRoomId();
+        LocalDateTime lastReadAt = Optional.ofNullable(participant.getLastReadAt())
+                  .orElse(LocalDateTime.of(1000, 1, 1, 0, 0));
+
+        return matchChatRepository.countUnreadMessages(roomId, participantId, lastReadAt);
+    }
+
 }

@@ -71,4 +71,13 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     Long findMatchRoomIdByUserProfile_userProfileIdAndMatchRoom_matchStatus(@Param("userProfileId") Long userProfileId, @Param("matchStatus") MatchStatus matchStatus);
 
     Optional<List<MatchParticipant>> findByMatchRoom_matchRoomId(Long matchRoomId);
+
+    @Query("""
+        SELECT mp
+        FROM MatchParticipant mp
+        WHERE mp.userProfile.userProfileId = :userProfileId
+          AND mp.matchRoom.matchStatus = 'MATCHED'
+    """)
+    Optional<MatchParticipant> findMatchedParticipantByUserProfileId(@Param("userProfileId") Long userProfileId);
+
 }

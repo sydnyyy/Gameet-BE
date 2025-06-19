@@ -2,6 +2,7 @@ package com.gameet.chat.api;
 
 import com.gameet.chat.dto.ChatMessage;
 import com.gameet.chat.dto.MatchParticipantsInfoResponse;
+import com.gameet.chat.dto.UnreadChatResponse;
 import com.gameet.chat.service.MatchChatService;
 import com.gameet.global.annotation.AccessLoggable;
 import com.gameet.global.dto.UserPrincipal;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +22,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
+@Slf4j
 public class MatchChatController {
 
     private final MatchChatService matchChatService;
 
-    @GetMapping("/{roomId}/messages")
-    public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable Long roomId) {
-        List<ChatMessage> messages = matchChatService.getChatMessagesByRoomId(roomId);
+    @GetMapping("/{matchRoomId}/messages")
+    public ResponseEntity<List<ChatMessage>> getMessages(@PathVariable Long matchRoomId) {
+        List<ChatMessage> messages = matchChatService.getChatMessagesByRoomId(matchRoomId);
         return ResponseEntity.ok(messages);
     }
 
@@ -53,5 +56,12 @@ public class MatchChatController {
     public ResponseEntity<Void> updateLastReadAt(@PathVariable Long matchParticipantId) {
         matchChatService.updateLastReadAt(matchParticipantId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/unread-count/{userProfileId}")
+    public ResponseEntity<Long> getUnreadCountByUser(@PathVariable Long userProfileId) {
+        long unreadCount = matchChatService.getUnreadCount(userProfileId);
+
+        return ResponseEntity.ok(unreadCount);
     }
 }
