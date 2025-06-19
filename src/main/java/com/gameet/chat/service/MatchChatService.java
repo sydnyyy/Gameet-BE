@@ -22,6 +22,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -114,5 +115,13 @@ public class MatchChatService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT));
 
         return MatchParticipantsInfoResponse.of(matchParticipants, userId);
+    }
+
+    @Transactional
+    public void updateLastReadAt(Long matchParticipantId) {
+        MatchParticipant participant = matchParticipantRepository.findById(matchParticipantId)
+                  .orElseThrow(() -> new EntityNotFoundException("참가자를 찾을 수 없습니다."));
+
+        participant.setLastReadAtNow();
     }
 }

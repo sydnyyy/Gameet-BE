@@ -48,4 +48,10 @@ public class MatchChatController {
         matchChatService.completeMatch(matchRoomId);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/read/{matchParticipantId}")
+    public ResponseEntity<Void> updateLastReadAt(@PathVariable Long matchParticipantId) {
+        matchChatService.updateLastReadAt(matchParticipantId);
+        return ResponseEntity.ok().build();
+    }
 }
