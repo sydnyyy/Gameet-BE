@@ -58,7 +58,7 @@ public class MatchChatService {
 
             // 본인은 제외
             if (!participant.getMatchParticipantId().equals(sender.getMatchParticipantId())) {
-                notificationService.sendChatNotification(receiverId, room.getMatchRoomId());
+                notificationService.sendChatNotification(receiverId, room.getMatchRoomId(), sender.getMatchParticipantId());
             }
         }
 

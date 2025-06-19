@@ -46,8 +46,8 @@ public class NotificationService {
                 });
     }
 
-    public void sendChatNotification(Long receiverUserId, Long matchRoomId) {
-        NotificationPayload payload = NotificationPayload.fromMatchChat(matchRoomId);
+    public void sendChatNotification(Long receiverUserId, Long matchRoomId, Long senderId) {
+        NotificationPayload payload = NotificationPayload.fromMatchChat(matchRoomId, senderId);
         sendWebNotification(receiverUserId, payload);
     }
 
