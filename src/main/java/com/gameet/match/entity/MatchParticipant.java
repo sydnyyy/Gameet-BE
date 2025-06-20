@@ -6,6 +6,7 @@ import com.gameet.user.entity.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -38,6 +39,17 @@ public class MatchParticipant extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "matchParticipant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchReportLog> matchReportLog;
+
+    @Column(name = "last_read_at")
+    private LocalDateTime lastReadAt;
+
+    public void setLastReadAt(LocalDateTime readAt) {
+        this.lastReadAt = readAt;
+    }
+
+    public void setLastReadAtNow() {
+        this.lastReadAt = LocalDateTime.now();
+    }
 
     public static MatchParticipant of(MatchRoom matchRoom, MatchParticipantInsert insert) {
         MatchParticipant matchParticipant = MatchParticipant.builder()

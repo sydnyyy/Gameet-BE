@@ -3,6 +3,7 @@ package com.gameet.notification.dto;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.notification.enums.MessageType;
+
 import lombok.Builder;
 
 @Builder
@@ -10,7 +11,8 @@ public record NotificationPayload (
         MessageType messageType,
         MatchStatus matchStatus,
         Long matchRoomId,
-        String content
+        String content,
+        Long senderId
 ) {
 
     public static NotificationPayload fromMatchResult(MatchStatus matchStatus, Long matchRoomId) {
@@ -41,12 +43,13 @@ public record NotificationPayload (
 
     }
 
-    public static NotificationPayload fromMatchChat(Long matchRoomId) {
+    public static NotificationPayload fromMatchChat(Long matchRoomId, Long senderId) {
         return NotificationPayload.builder()
                 .messageType(MessageType.CHAT)
                 .matchStatus(null)
                 .matchRoomId(matchRoomId)
                 .content("새로운 채팅이 도착했습니다.")
+                .senderId(senderId)
                 .build();
 
     }
