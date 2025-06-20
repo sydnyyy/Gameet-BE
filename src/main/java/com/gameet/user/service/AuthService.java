@@ -204,6 +204,7 @@ public class AuthService {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(10);
+        cookie.setSecure(true);
         httpServletResponse.addCookie(cookie);
     }
 }
