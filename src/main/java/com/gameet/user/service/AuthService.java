@@ -205,7 +205,6 @@ public class AuthService {
         cookie.setPath("/");
         cookie.setMaxAge(10);
         cookie.setSecure(true);
-        cookie.setDomain(".gameet.store");
         httpServletResponse.addCookie(cookie);
     }
 }
