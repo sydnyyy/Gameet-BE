@@ -16,7 +16,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final String ENDPOINT = "/ws";
-    private static final String[] ALLOWED_ORIGINS = {"http://localhost:8000"};
+    private static final String[] ALLOWED_ORIGINS = {"https://gameet.vercel.app/", "http://localhost:8000"};
     private static final String[] SIMPLE_BROKER = {"/topic", "/queue"};
     private static final String PUBLISH = "/app";
     private static final String USER_DESTINATION_PREFIX = "/user";
@@ -30,10 +30,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns(ALLOWED_ORIGINS)
                 .setHandshakeHandler(webSocketHandShakeHandler)
                 .withSockJS();
-
-        registry.addEndpoint(ENDPOINT)
-                .setAllowedOriginPatterns(ALLOWED_ORIGINS)
-                .setHandshakeHandler(webSocketHandShakeHandler);
     }
 
     @Override
