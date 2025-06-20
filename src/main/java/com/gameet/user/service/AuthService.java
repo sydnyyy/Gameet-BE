@@ -14,13 +14,15 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.user.dto.response.UserResponse;
 import com.gameet.user.entity.User;
 import com.gameet.user.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.server.Cookie;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -91,12 +93,16 @@ public class AuthService {
 
     private void generateRefreshToken(Long userId, Role role, HttpServletResponse httpServletResponse) {
         String refreshToken = jwtUtil.generateRefreshToken(userId, role);
-        Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 7);
-        httpServletResponse.addCookie(cookie);
+
+        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60 * 24 * 7)
+                .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .build();
+
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         refreshTokenRepository.saveRefreshToken(userId, refreshToken);
     }
@@ -131,11 +137,15 @@ public class AuthService {
             // TODO: BLACKLIST 추가
         }
 
-        Cookie cookie = new Cookie(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        httpServletResponse.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, null)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60 * 24 * 7)
+                .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .build();
+
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     public void sendVerificationCode(String toEmail, EmailPurpose emailPurpose) {
@@ -200,11 +210,15 @@ public class AuthService {
 
     public void issueWebsocketTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
         String websocketToken = jwtUtil.generateWebSocketToken(userId, role);
-        Cookie cookie = new Cookie(JwtUtil.COOKIE_WEBSOCKET_TOKEN_NAME, websocketToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(10);
-        cookie.setSecure(true);
-        httpServletResponse.addCookie(cookie);
+
+        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, websocketToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(10)
+                .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .build();
+
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
