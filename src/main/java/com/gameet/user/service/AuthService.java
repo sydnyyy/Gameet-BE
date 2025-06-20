@@ -100,6 +100,7 @@ public class AuthService {
                 .path("/")
                 .maxAge(60 * 60 * 24 * 7)
                 .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .domain("gameet.vercel.app")
                 .build();
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -143,6 +144,7 @@ public class AuthService {
                 .path("/")
                 .maxAge(60 * 60 * 24 * 7)
                 .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .domain("gameet.vercel.app")
                 .build();
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -211,12 +213,13 @@ public class AuthService {
     public void issueWebsocketTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
         String websocketToken = jwtUtil.generateWebSocketToken(userId, role);
 
-        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, websocketToken)
+        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_WEBSOCKET_TOKEN_NAME, websocketToken)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .maxAge(10)
                 .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .domain("gameet.vercel.app")
                 .build();
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
