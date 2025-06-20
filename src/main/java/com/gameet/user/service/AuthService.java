@@ -211,7 +211,7 @@ public class AuthService {
     public void issueWebsocketTokenAndAttachToResponse(Long userId, Role role, HttpServletResponse httpServletResponse) {
         String websocketToken = jwtUtil.generateWebSocketToken(userId, role);
 
-        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_REFRESH_TOKEN_NAME, websocketToken)
+        ResponseCookie cookie = ResponseCookie.from(JwtUtil.COOKIE_WEBSOCKET_TOKEN_NAME, websocketToken)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
