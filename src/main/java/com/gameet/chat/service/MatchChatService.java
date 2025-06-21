@@ -114,7 +114,7 @@ public class MatchChatService {
     @Transactional
     public MatchParticipantsInfoResponse getMatchParticipantsInfo(Long matchRoomId, Long userId) {
         List<MatchParticipant> matchParticipants = matchParticipantRepository.findByMatchRoom_matchRoomId(matchRoomId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT));
+                  .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT));
 
         return MatchParticipantsInfoResponse.of(matchParticipants, userId);
     }
@@ -128,16 +128,16 @@ public class MatchChatService {
     }
 
     public long getUnreadCount(Long userProfileId) {
-        MatchParticipant participant = matchParticipantRepository
-                  .findMatchedParticipantByUserProfileId(userProfileId)
-                  .orElseThrow(() -> new EntityNotFoundException("매칭된 참가자를 찾을 수 없습니다."));
+        return matchParticipantRepository.findMatchedParticipantByUserProfileId(userProfileId)
+                  .map(participant -> {
+                      Long participantId = participant.getMatchParticipantId();
+                      Long roomId = participant.getMatchRoom().getMatchRoomId();
+                      LocalDateTime lastReadAt = Optional.ofNullable(participant.getLastReadAt())
+                                .orElse(LocalDateTime.of(1000, 1, 1, 0, 0));
 
-        Long participantId = participant.getMatchParticipantId();
-        Long roomId = participant.getMatchRoom().getMatchRoomId();
-        LocalDateTime lastReadAt = Optional.ofNullable(participant.getLastReadAt())
-                  .orElse(LocalDateTime.of(1000, 1, 1, 0, 0));
-
-        return matchChatRepository.countUnreadMessages(roomId, participantId, lastReadAt);
+                      return matchChatRepository.countUnreadMessages(roomId, participantId, lastReadAt);
+                  })
+                  .orElse(0L);
     }
 
 }
