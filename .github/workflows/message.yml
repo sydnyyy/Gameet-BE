@@ -69,6 +69,6 @@ jobs:
               --network gameet-net \
               --env-file /home/ubuntu/.env \
               -e REDIS_HOST=redis-gameet \
-              -e TZ=Asia/Seoul \   
+              -e TZ=Asia/Seoul \
               -p 8080:8080 \
               $IMAGE_NAME
