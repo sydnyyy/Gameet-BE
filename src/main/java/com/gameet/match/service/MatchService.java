@@ -288,6 +288,12 @@ public class MatchService {
             throw new CustomException(ErrorCode.ONLY_MATCHED_STATUS_ALLOWED);
         }
 
+        // 약속 중복 체크
+        boolean alreadyAppointed = matchAppointmentRepository.findByMatchRoomId(matchAppointmentRequest.matchRoomId()).isPresent();
+        if (alreadyAppointed) {
+            throw new CustomException(ErrorCode.ALREADY_MATCH_APPOINTED);
+        }
+
         MatchAppointment appointment = MatchAppointment.of(matchAppointmentRequest);
         matchAppointmentRepository.save(appointment);
 
