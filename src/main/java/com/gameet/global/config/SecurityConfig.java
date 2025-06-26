@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_PATTERNS).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers("/api/match/**").hasRole("USER")
-                        .requestMatchers("/api/users/auth/token/websocket").hasRole("USER")
+                        .requestMatchers("/api/users/auth/token/websocket").hasAnyRole("USER", "GUEST")
                         .requestMatchers(HttpMethod.POST, "/api/users/profile").hasRole("GUEST")
                         .requestMatchers(HttpMethod.PUT, "/api/users/profile").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/users/profile").hasRole("USER")
