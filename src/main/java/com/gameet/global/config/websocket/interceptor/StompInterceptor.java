@@ -42,10 +42,10 @@ public class StompInterceptor implements ChannelInterceptor {
 
             Authentication authentication = jwtAuthenticationProvider.getAuthentication(token);
 
-            boolean hasValidRole = authentication.getAuthorities().stream()
-                      .anyMatch(a -> Set.of("ROLE_USER", "ROLE_GUEST").contains(a.getAuthority()));
+            boolean hasRoleUser = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
 
-            if (!hasValidRole ) {
+            if (!hasRoleUser) {
                 throw new AccessDeniedException("접근이 거부되었습니다.");
             }
 
