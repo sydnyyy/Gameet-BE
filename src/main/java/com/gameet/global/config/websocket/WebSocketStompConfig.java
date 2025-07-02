@@ -13,7 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final String ENDPOINT = "/ws";
     private static final String[] ALLOWED_ORIGINS = {"https://gameet.vercel.app/", "http://localhost:8000"};
