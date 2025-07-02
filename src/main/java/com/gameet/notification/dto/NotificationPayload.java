@@ -53,4 +53,18 @@ public record NotificationPayload (
                 .build();
 
     }
+
+    public static NotificationPayload fromStompSubscribe(MessageType messageType, String destination) {
+        return NotificationPayload.builder()
+                .messageType(messageType)
+                .content(destination + " 구독 성공")
+                .build();
+    }
+
+    public static NotificationPayload fromError(MessageType messageType) {
+        return NotificationPayload.builder()
+                .messageType(messageType)
+                .content(messageType.name())
+                .build();
+    }
 }
