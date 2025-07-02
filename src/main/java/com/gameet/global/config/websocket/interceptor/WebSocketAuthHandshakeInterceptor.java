@@ -4,7 +4,6 @@ import com.gameet.global.jwt.JwtUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -12,9 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -30,22 +27,7 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
                                    @NonNull WebSocketHandler wsHandler,
                                    @NonNull Map<String, Object> attributes) throws Exception {
 
-        String token = "";
-        List<String> cookieHeaders = request.getHeaders().get(HttpHeaders.COOKIE);
-        for (String cookieHeader : Objects.requireNonNull(cookieHeaders)) {
-            String[] cookies = cookieHeader.split(";");
-            for (String cookie : cookies) {
-                String[] nameValue = cookie.trim().split("=", 2);
-                if (nameValue.length == 2) {
-                    String name = nameValue[0];
-                    String value = nameValue[1];
-                    if (JwtUtil.COOKIE_WEBSOCKET_TOKEN_NAME.equals(name)) {
-                        token = value;
-                        break;
-                    }
-                }
-            }
-        }
+        String token = jwtUtil.getWebSocketTokenFromRequest(request);
 
         if (token == null || token.isBlank()) {
             log.warn("[beforeHandshake] Missing WebSocket token in handshake request");
