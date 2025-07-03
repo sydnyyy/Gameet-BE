@@ -7,19 +7,17 @@ import io.jsonwebtoken.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
+import java.net.URI;
 import java.util.Date;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtUtil {
 
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15;
@@ -28,7 +26,7 @@ public class JwtUtil {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
     public final static String COOKIE_REFRESH_TOKEN_NAME = "refresh_token";
-    public final static String COOKIE_WEBSOCKET_TOKEN_NAME = "websocket_token";
+    public final static String WEBSOCKET_TOKEN_PARAM = "websocket_token";
 
     private final JwtProperties jwtProperties;
 
@@ -80,23 +78,19 @@ public class JwtUtil {
         return null;
     }
 
-    public String getAccessTokenFromRequest(ServerHttpRequest request) {
-        List<String> queryParams = request.getURI().getQuery() != null ?
-                Arrays.asList(request.getURI().getQuery().split("&")) : Collections.emptyList();
+    public String getWebSocketTokenFromRequest(ServerHttpRequest serverHttpRequest) {
+        URI uri = serverHttpRequest.getURI();
+        String query = uri.getQuery();
+        if (query == null) return null;
 
-        for (String param : queryParams) {
-            String[] kv = param.split("=");
-            if (kv.length == 2 && kv[0].equalsIgnoreCase(JwtUtil.HEADER_AUTHORIZATION)) {
-                String header = URLDecoder.decode(kv[1], StandardCharsets.UTF_8);
-                if (header != null && header.startsWith(JwtUtil.TOKEN_PREFIX)) {
-                    return header.split(" ", 2)[1];
-                }
+        for (String param : query.split("&")) {
+            String[] kv = param.split("=", 2);
+            if (kv.length == 2 && kv[0].equals(JwtUtil.WEBSOCKET_TOKEN_PARAM)) {
+                return kv[1];
             }
         }
-
         return null;
     }
-
 
     public boolean validateToken(String token) {
         try {
@@ -135,6 +129,18 @@ public class JwtUtil {
                 .setSigningKey(jwtProperties.getSecretKey())
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public Claims getClaimsAllowExpired(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(jwtProperties.getSecretKey())
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.warn("[getClaimsAllowExpired] extracting claims from expired token={}", e.getMessage());
+            return e.getClaims();
+        }
     }
 
     public String getRefreshToken(HttpServletRequest httpServletRequest) {

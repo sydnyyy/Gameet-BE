@@ -29,6 +29,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Tag(name = "Auth", description = "인증 API")
 @RestController
 @RequiredArgsConstructor
@@ -172,9 +174,10 @@ public class AuthController {
     })
     @AccessLoggable(action = "웹소켓 토큰 발급")
     @GetMapping("/token/websocket")
-    public ResponseEntity<?> getWebSocketToken(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                                               HttpServletResponse httpServletResponse) {
-        authService.issueWebsocketTokenAndAttachToResponse(userPrincipal.getUserId(), userPrincipal.getRole(), httpServletResponse);
-        return ResponseEntity.ok("웹소켓 토큰 발급 성공");
+    public ResponseEntity<?> getWebSocketToken(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        String webSocketToken = authService.issueWebsocketToken(userPrincipal.getUserId(), userPrincipal.getRole());
+        return ResponseEntity.ok(Map.of(
+                "message", "웹소켓 토큰 발급 성공",
+                "webSocketToken", webSocketToken));
     }
 }

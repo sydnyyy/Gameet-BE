@@ -2,6 +2,7 @@ package com.gameet.global.config.websocket;
 
 import com.gameet.global.config.websocket.interceptor.StompInterceptor;
 import com.gameet.global.config.websocket.handler.WebSocketHandShakeHandler;
+import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -13,7 +14,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final String ENDPOINT = "/ws";
     private static final String[] ALLOWED_ORIGINS = {"https://gameet.vercel.app/", "http://localhost:8000"};
@@ -22,14 +23,21 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private static final String USER_DESTINATION_PREFIX = "/user";
 
     private final StompInterceptor stompInterceptor;
+    private final WebSocketAuthHandshakeInterceptor webSocketAuthHandshakeInterceptor;
     private final WebSocketHandShakeHandler webSocketHandShakeHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(ENDPOINT)
                 .setAllowedOriginPatterns(ALLOWED_ORIGINS)
+                .addInterceptors(webSocketAuthHandshakeInterceptor)
                 .setHandshakeHandler(webSocketHandShakeHandler)
                 .withSockJS();
+
+        registry.addEndpoint(ENDPOINT)
+                .setAllowedOriginPatterns(ALLOWED_ORIGINS)
+                .addInterceptors(webSocketAuthHandshakeInterceptor)
+                .setHandshakeHandler(webSocketHandShakeHandler);
     }
 
     @Override

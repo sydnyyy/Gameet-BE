@@ -20,7 +20,15 @@ public class JwtAuthenticationProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = jwtUtil.getClaims(token);
+        return createAuthenticationFromClaims(claims, token);
+    }
 
+    public Authentication getAuthenticationAllowExpired(String token) {
+        Claims claims = jwtUtil.getClaimsAllowExpired(token);
+        return createAuthenticationFromClaims(claims, token);
+    }
+
+    private Authentication createAuthenticationFromClaims(Claims claims, String token) {
         Long userId = claims.get("userId", Long.class);
         Role role = Role.valueOf(claims.get("role", String.class));
 
