@@ -1,5 +1,7 @@
 package com.gameet.global.config.websocket.handler;
 
+import com.gameet.common.service.DiscordNotifier;
+import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.CloseStatus;
@@ -12,8 +14,12 @@ import java.nio.channels.ClosedChannelException;
 @Slf4j
 public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
 
-    public CustomStompErrorHandler(WebSocketHandler delegate) {
+    private final DiscordNotifier discordNotifier;
+
+    public CustomStompErrorHandler(WebSocketHandler delegate,
+                                   DiscordNotifier discordNotifier) {
         super(delegate);
+        this.discordNotifier = discordNotifier;
     }
 
     @Override
@@ -31,6 +37,9 @@ public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
         if (closeStatus.getCode() != CloseStatus.NORMAL.getCode()) {
             log.warn("🔴 [CustomStompErrorHandler] 비정상적인 WebSocket 연결 종료. 세션 ID: {}, 상태: {}", session.getId(), closeStatus);
+            discordNotifier.send(
+                    "🔴 WebSocket 세션 비정상 종료 감지",
+                    "- 세션 ID: " + session.getId() + "\n" + "- 사용자 ID: " + session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY));
         } else {
             log.info("🟢 [CustomStompErrorHandler] WebSocket 연결 정상 종료. 세션 ID: {}", session.getId());
         }

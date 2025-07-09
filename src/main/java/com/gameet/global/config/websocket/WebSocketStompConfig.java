@@ -1,5 +1,6 @@
 package com.gameet.global.config.websocket;
 
+import com.gameet.common.service.DiscordNotifier;
 import com.gameet.global.config.websocket.handler.CustomStompErrorHandler;
 import com.gameet.global.config.websocket.interceptor.StompInterceptor;
 import com.gameet.global.config.websocket.handler.WebSocketHandShakeHandler;
@@ -27,6 +28,8 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     private final StompInterceptor stompInterceptor;
     private final WebSocketAuthHandshakeInterceptor webSocketAuthHandshakeInterceptor;
     private final WebSocketHandShakeHandler webSocketHandShakeHandler;
+
+    private final DiscordNotifier discordNotifier;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -56,6 +59,6 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.addDecoratorFactory(CustomStompErrorHandler::new);
+        registration.addDecoratorFactory(delegate -> new CustomStompErrorHandler(delegate, discordNotifier));
     }
 }

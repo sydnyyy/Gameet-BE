@@ -20,6 +20,7 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtUtil jwtUtil;
     public static final String WEBSOCKET_TOKEN_KEY = "websocket_token";
+    public static final String USER_ID_KEY = "user_id";
 
     @Override
     public boolean beforeHandshake(@NonNull ServerHttpRequest request,
@@ -42,6 +43,10 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
         }
 
         attributes.put(WEBSOCKET_TOKEN_KEY, token);
+
+        Long userId = jwtUtil.getUserIdFromToken(token);
+        attributes.put(USER_ID_KEY, userId);
+
         log.info("[beforeHandshake] Valid websocket token: {}", token);
 
         return true;
