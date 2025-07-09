@@ -34,7 +34,7 @@ public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+    public void afterConnectionClosed(@NotNull WebSocketSession session, CloseStatus closeStatus) throws Exception {
         if (closeStatus.getCode() != CloseStatus.NORMAL.getCode()) {
             log.warn("🔴 [CustomStompErrorHandler] 비정상적인 WebSocket 연결 종료. 세션 ID: {}, 상태: {}", session.getId(), closeStatus);
             discordNotifier.send(
