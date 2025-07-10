@@ -42,3 +42,7 @@ logging:
     org.springframework.messaging: DEBUG
     org.springframework.web.socket: DEBUG
     org.springframework.web: DEBUG
+
+discord:
+  webhook:
+    websocket-uri: ${WEBSOCKET_SESSION_ISSUE_CHANNEL}

@@ -1,5 +1,7 @@
 package com.gameet.global.config.websocket;
 
+import com.gameet.common.service.DiscordNotifier;
+import com.gameet.global.config.websocket.handler.CustomStompErrorHandler;
 import com.gameet.global.config.websocket.interceptor.StompInterceptor;
 import com.gameet.global.config.websocket.handler.WebSocketHandShakeHandler;
 import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
@@ -10,6 +12,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -25,6 +28,8 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     private final StompInterceptor stompInterceptor;
     private final WebSocketAuthHandshakeInterceptor webSocketAuthHandshakeInterceptor;
     private final WebSocketHandShakeHandler webSocketHandShakeHandler;
+
+    private final DiscordNotifier discordNotifier;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -50,5 +55,10 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompInterceptor);
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.addDecoratorFactory(delegate -> new CustomStompErrorHandler(delegate, discordNotifier));
     }
 }
