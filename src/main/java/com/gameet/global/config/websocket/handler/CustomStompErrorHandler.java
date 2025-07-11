@@ -2,6 +2,7 @@ package com.gameet.global.config.websocket.handler;
 
 import com.gameet.common.service.DiscordNotifier;
 import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
+import com.gameet.global.config.websocket.manager.WebSocketSessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.CloseStatus;
@@ -15,34 +16,44 @@ import java.nio.channels.ClosedChannelException;
 public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
 
     private final DiscordNotifier discordNotifier;
+    private final WebSocketSessionManager webSocketSessionManager;
 
     public CustomStompErrorHandler(WebSocketHandler delegate,
-                                   DiscordNotifier discordNotifier) {
+                                   DiscordNotifier discordNotifier,
+                                   WebSocketSessionManager webSocketSessionManager) {
         super(delegate);
         this.discordNotifier = discordNotifier;
+        this.webSocketSessionManager = webSocketSessionManager;
     }
 
     @Override
     public void handleTransportError(@NotNull WebSocketSession session,
                                      @NotNull Throwable exception) throws Exception {
+        String userId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY).toString();
+
         if (isClosedChannelException(exception)) {
-            log.warn("🔴 [CustomStompErrorHandler] 비정상적인 채널 닫힘 감지(ClosedChannelException). 세션 ID: {}", session.getId());
+            log.warn("🔴 비정상적인 채널 닫힘 감지(ClosedChannelException). User ID: {}, Session ID: {}", userId, session.getId());
         } else {
-            log.error("🔴 [CustomStompErrorHandler] WebSocket 전송 오류 발생. 세션 ID: {}", session.getId(), exception);
+            log.error("🔴 WebSocket 전송 오류 발생. User ID: {}, Session ID: {}", userId, session.getId(), exception);
         }
         super.handleTransportError(session, exception);
     }
 
     @Override
     public void afterConnectionClosed(@NotNull WebSocketSession session, CloseStatus closeStatus) throws Exception {
+        String userId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY).toString();
+
         if (closeStatus.getCode() != CloseStatus.NORMAL.getCode()) {
-            log.warn("🔴 [CustomStompErrorHandler] 비정상적인 WebSocket 연결 종료. 세션 ID: {}, 상태: {}", session.getId(), closeStatus);
+            log.warn("🔴 비정상적인 WebSocket 연결 종료. User ID: {}, Session ID: {}, 상태: {}", userId, session.getId(), closeStatus);
             discordNotifier.send(
                     "🔴 WebSocket 세션 비정상 종료 감지",
-                    "- 세션 ID: " + session.getId() + "\n" + "- 사용자 ID: " + session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY));
+                    "- User ID: " + userId + "\n"
+                            + "- Session ID: " + session.getId() + "\n");
         } else {
-            log.info("🟢 [CustomStompErrorHandler] WebSocket 연결 정상 종료. 세션 ID: {}", session.getId());
+            log.info("🟢 WebSocket 연결 정상 종료. User ID: {}, Session ID: {}", userId, session.getId());
         }
+
+        webSocketSessionManager.unregister(userId);
         super.afterConnectionClosed(session, closeStatus);
     }
 
