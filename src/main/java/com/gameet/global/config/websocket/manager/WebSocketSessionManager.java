@@ -40,4 +40,8 @@ public class WebSocketSessionManager {
         sessions.put(userId, session);
         return true;
     }
+
+    public void unregister(String userId) {
+        sessions.remove(userId);
+    }
 }

@@ -2,6 +2,7 @@ package com.gameet.global.config.websocket.handler;
 
 import com.gameet.common.service.DiscordNotifier;
 import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
+import com.gameet.global.config.websocket.manager.WebSocketSessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.CloseStatus;
@@ -15,11 +16,14 @@ import java.nio.channels.ClosedChannelException;
 public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
 
     private final DiscordNotifier discordNotifier;
+    private final WebSocketSessionManager webSocketSessionManager;
 
     public CustomStompErrorHandler(WebSocketHandler delegate,
-                                   DiscordNotifier discordNotifier) {
+                                   DiscordNotifier discordNotifier,
+                                   WebSocketSessionManager webSocketSessionManager) {
         super(delegate);
         this.discordNotifier = discordNotifier;
+        this.webSocketSessionManager = webSocketSessionManager;
     }
 
     @Override
@@ -49,6 +53,7 @@ public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
             log.info("🟢 WebSocket 연결 정상 종료. User ID: {}, Session ID: {}", userId, session.getId());
         }
 
+        webSocketSessionManager.unregister(userId);
         super.afterConnectionClosed(session, closeStatus);
     }
 

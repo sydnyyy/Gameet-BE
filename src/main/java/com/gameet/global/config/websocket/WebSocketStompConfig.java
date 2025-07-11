@@ -64,7 +64,8 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.addDecoratorFactory(delegate ->
                 new CustomStompSessionHandler(
-                        new CustomStompErrorHandler(delegate, discordNotifier), webSocketSessionManager
+                        new CustomStompErrorHandler(delegate, discordNotifier, webSocketSessionManager),
+                        webSocketSessionManager
                 )
         );
     }
