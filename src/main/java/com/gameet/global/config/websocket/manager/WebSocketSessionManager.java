@@ -29,7 +29,9 @@ public class WebSocketSessionManager {
                 existingSession.close(CloseStatus.NORMAL);
                 discordNotifier.send(
                         "🟠 중복 WebSocket 연결 감지",
-                        "- userId: " + userId + "\n" + "- sessionId: " + existingSession.getId() + " -> " + session.getId());
+                        "- User ID: " + userId + "\n"
+                                + "- Session ID: " + existingSession.getId() + " -> " + session.getId() + "\n"
+                                + "- 기존 세션 " + existingSession.getId() + " 종료");
             } catch (IOException e) {
                 log.error("🔴 기존 WebSocket 세션 종료 실패. userId: {}, sessionId: {}", userId, existingSession.getId());
                 return false;
