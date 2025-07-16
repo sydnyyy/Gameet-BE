@@ -26,7 +26,7 @@ public class WebSocketSessionManager {
                         userId,
                         existingSession.getId(), session.getId());
 
-                existingSession.close(CloseStatus.NORMAL);
+                existingSession.close(new CloseStatus(4400, "Duplicate WebSocket connection"));
                 discordNotifier.send(
                         "🟠 중복 WebSocket 연결 감지",
                         "- User ID: " + userId + "\n"
