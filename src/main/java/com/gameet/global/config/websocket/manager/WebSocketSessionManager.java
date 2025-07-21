@@ -15,33 +15,34 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class WebSocketSessionManager {
 
-    private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, WebSocketSession> browserTabSessions = new ConcurrentHashMap<>();
     private final DiscordNotifier discordNotifier;
 
-    public synchronized boolean register(String userId, WebSocketSession session) {
-        WebSocketSession existingSession = sessions.get(userId);
+    public synchronized boolean register(String browserTabToken, WebSocketSession session) {
+        WebSocketSession existingSession = browserTabSessions.get(browserTabToken);
         if (existingSession != null && existingSession.isOpen()) {
             try {
-                log.warn("🟠 중복 WebSocket 연결 감지. userId: {}, sessionId: {} -> {}",
-                        userId,
+                log.warn("🟠 중복 WebSocket 연결 감지. browserTabToken={}, sessionId={} -> {}",
+                        browserTabToken,
                         existingSession.getId(), session.getId());
 
                 existingSession.close(new CloseStatus(4400, "Duplicate WebSocket connection"));
                 discordNotifier.send(
                         "🟠 중복 WebSocket 연결 감지",
-                        "- User ID: " + userId + "\n"
-                                + "- Session ID: " + existingSession.getId() + " -> " + session.getId() + "\n"
+                        "- browserTabToken=" + browserTabToken + "\n"
+                                + "- Session ID=" + existingSession.getId() + " -> " + session.getId() + "\n"
                                 + "- 기존 세션 " + existingSession.getId() + " 종료");
             } catch (IOException e) {
-                log.error("🔴 기존 WebSocket 세션 종료 실패. userId: {}, sessionId: {}", userId, existingSession.getId());
+                log.error("🔴 기존 WebSocket 세션 종료 실패. browserTabToken={}, sessionId={}", browserTabToken, existingSession.getId());
                 return false;
             }
         }
-        sessions.put(userId, session);
+
+        browserTabSessions.put(browserTabToken, session);
         return true;
     }
 
-    public void unregister(String userId) {
-        sessions.remove(userId);
+    public void unregister(String browserTabToken) {
+        browserTabSessions.remove(browserTabToken);
     }
 }

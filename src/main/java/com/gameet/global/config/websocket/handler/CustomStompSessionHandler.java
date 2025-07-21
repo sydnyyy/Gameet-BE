@@ -21,14 +21,14 @@ public class CustomStompSessionHandler extends WebSocketHandlerDecorator {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        String userId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY).toString();
-        boolean success = webSocketSessionManager.register(userId, session);
+        String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
+        boolean success = webSocketSessionManager.register(browserTabToken, session);
         if (!success) {
-            log.warn("🟠 중복 WebSocket 연결 시도 감지(기존 세션 close 실패 & 현재 세션 강제 종료). userId: {}", userId);
+            log.warn("🟠 중복 WebSocket 연결 시도 감지(기존 세션 close 실패 & 현재 세션 강제 종료). browserTabToken={}", browserTabToken);
             session.close(CloseStatus.PROTOCOL_ERROR);
         }
         else  {
-            log.info("🟢 WebSocket 세션 연결. userId: {}, sessionId: {}", userId, session.getId());
+            log.info("🟢 WebSocket 세션 연결. browserTabToken={}, sessionId={}", browserTabToken, session.getId());
         }
         super.afterConnectionEstablished(session);
     }
