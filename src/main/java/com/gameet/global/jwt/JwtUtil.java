@@ -8,7 +8,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +25,6 @@ public class JwtUtil {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
     public final static String COOKIE_REFRESH_TOKEN_NAME = "refresh_token";
-    public final static String WEBSOCKET_TOKEN_PARAM = "websocket_token";
 
     private final JwtProperties jwtProperties;
 
@@ -74,20 +72,6 @@ public class JwtUtil {
         String header = stompHeaderAccessor.getFirstNativeHeader(HEADER_AUTHORIZATION);
         if (header != null && header.startsWith(TOKEN_PREFIX)) {
             return header.split(" ", 2)[1];
-        }
-        return null;
-    }
-
-    public String getWebSocketTokenFromRequest(ServerHttpRequest serverHttpRequest) {
-        URI uri = serverHttpRequest.getURI();
-        String query = uri.getQuery();
-        if (query == null) return null;
-
-        for (String param : query.split("&")) {
-            String[] kv = param.split("=", 2);
-            if (kv.length == 2 && kv[0].equals(JwtUtil.WEBSOCKET_TOKEN_PARAM)) {
-                return kv[1];
-            }
         }
         return null;
     }
