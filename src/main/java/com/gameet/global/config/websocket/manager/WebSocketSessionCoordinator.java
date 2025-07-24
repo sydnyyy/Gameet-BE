@@ -2,6 +2,7 @@ package com.gameet.global.config.websocket.manager;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 @Component
@@ -16,7 +17,11 @@ public class WebSocketSessionCoordinator {
     }
 
     public void closeSession(WebSocketSession session) {
-        webSocketSessionManager.unregister(session);
-        webSocketSessionCloser.tryCloseSession(session);
+        webSocketSessionManager.unregisterSession(session);
+        webSocketSessionCloser.tryCloseSession(session, CloseStatus.NORMAL);
+    }
+
+    public void closeSessionsOnLogout(Long userId) {
+        webSocketSessionManager.closeSessionsOnLogout(userId);
     }
 }

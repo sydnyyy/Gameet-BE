@@ -5,6 +5,7 @@ import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInte
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
@@ -35,7 +36,7 @@ public class WebSocketSessionManager {
                     existingSession.getId(), session.getId());
 
             browserTabSessions.remove(browserTabToken);
-            if(!webSocketSessionCloser.tryCloseSession(existingSession)) {
+            if(!webSocketSessionCloser.tryCloseSession(existingSession, 4400, "Duplicate WebSocket connection")) {
                 return false;
             }
 
@@ -52,7 +53,7 @@ public class WebSocketSessionManager {
         return true;
     }
 
-    public synchronized void unregister(WebSocketSession session) {
+    public synchronized void unregisterSession(WebSocketSession session) {
         Long userId = (Long) session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY);
         String clientId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.CLIENT_ID_KEY).toString();
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
@@ -61,12 +62,33 @@ public class WebSocketSessionManager {
 
         clientTabTokens.computeIfPresent(clientId, (clientIdKey, tabTokens) -> {
             tabTokens.remove(browserTabToken);
+
+            if (tabTokens.isEmpty()) {
+                userClients.computeIfPresent(userId, (userIdKey, clientIds) -> {
+                    clientIds.remove(clientId);
+                    return clientIds.isEmpty() ? null : clientIds;
+                });
+            }
             return tabTokens.isEmpty() ? null : tabTokens;
         });
+    }
 
-        userClients.computeIfPresent(userId, (userIdKey, clientIds) -> {
-            clientIds.remove(clientId);
-            return clientIds.isEmpty() ? null : clientIds;
-        });
+    public synchronized void closeSessionsOnLogout(Long userId) {
+        Set<String> clientIdsToRemove = userClients.remove(userId);
+        if (clientIdsToRemove != null && !clientIdsToRemove.isEmpty()) {
+            clientIdsToRemove
+                    .forEach(clientId -> {
+                        Set<String> tabTokensToRemove = clientTabTokens.remove(clientId);
+                        if (tabTokensToRemove != null && !tabTokensToRemove.isEmpty()) {
+                            tabTokensToRemove
+                                    .forEach(browserTabToken -> {
+                                        WebSocketSession session = browserTabSessions.remove(browserTabToken);
+                                        if (session != null && session.isOpen()) {
+                                            webSocketSessionCloser.tryCloseSession(session, CloseStatus.NORMAL);
+                                        }
+                                    });
+                        }
+                    });
+        }
     }
 }

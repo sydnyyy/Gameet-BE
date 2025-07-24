@@ -1,6 +1,7 @@
 package com.gameet.user.service;
 
 import com.gameet.common.enums.EmailPurpose;
+import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
 import com.gameet.notification.service.EmailService;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
@@ -33,14 +34,14 @@ import java.security.SecureRandom;
 public class AuthService {
 
     public static final String HEADER_PASSWORD_RESET_TOKEN = "Password-Reset-Token";
+
     private final JwtUtil jwtUtil;
-
     private final EmailService emailService;
-
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final WebSocketSessionCoordinator webSocketSessionCoordinator;
 
     @Transactional
     public UserResponse registerUser(SignUpRequest signUpRequest, Role role, HttpServletResponse httpServletResponse) {
@@ -126,13 +127,14 @@ public class AuthService {
     }
 
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        String accessToken = jwtUtil.getAccessToken(httpServletRequest);
+        Long userId = jwtUtil.getUserIdFromToken(accessToken);
+
         String refreshToken = jwtUtil.getRefreshToken(httpServletRequest);
         if (refreshToken != null) {
-            Long userId = jwtUtil.getUserIdFromToken(refreshToken);
             refreshTokenRepository.deleteRefreshTokenByUserId(userId);
         }
 
-        String accessToken = jwtUtil.getAccessToken(httpServletRequest);
         if (accessToken != null) {
             // TODO: BLACKLIST 추가
         }
@@ -146,6 +148,8 @@ public class AuthService {
                 .build();
 
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        webSocketSessionCoordinator.closeSessionsOnLogout(userId);
     }
 
     public void sendVerificationCode(String toEmail, EmailPurpose emailPurpose) {
