@@ -20,6 +20,7 @@ public class WebSocketSessionManager {
     private final Map<Long, Set<String>> userClients = new ConcurrentHashMap<>();  // { userId, clientId }
     private final Map<String, Set<String>> clientTabTokens = new ConcurrentHashMap<>();  // { clientId, browserTabToken }
     private final Map<String, WebSocketSession> browserTabSessions = new ConcurrentHashMap<>();  // { browserTabToken, session }
+    private final Set<String> closingSessionTokens = ConcurrentHashMap.newKeySet();
 
     private final WebSocketSessionCloser webSocketSessionCloser;
     private final DiscordNotifier discordNotifier;
@@ -54,6 +55,11 @@ public class WebSocketSessionManager {
     }
 
     public synchronized void unregisterSession(WebSocketSession session) {
+        if (closingSessionTokens.contains(session.getId())) {
+            closingSessionTokens.remove(session.getId());
+            return;
+        }
+
         Long userId = (Long) session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY);
         String clientId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.CLIENT_ID_KEY).toString();
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
@@ -84,6 +90,7 @@ public class WebSocketSessionManager {
                                     .forEach(browserTabToken -> {
                                         WebSocketSession session = browserTabSessions.remove(browserTabToken);
                                         if (session != null && session.isOpen()) {
+                                            closingSessionTokens.add(session.getId());
                                             webSocketSessionCloser.tryCloseSession(session, CloseStatus.NORMAL);
                                         }
                                     });
