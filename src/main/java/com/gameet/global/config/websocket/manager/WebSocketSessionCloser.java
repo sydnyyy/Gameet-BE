@@ -12,14 +12,30 @@ import java.io.IOException;
 @Slf4j
 public class WebSocketSessionCloser {
 
-    public boolean tryCloseSession(WebSocketSession session) {
+    public boolean tryCloseSession(WebSocketSession session, CloseStatus status) {
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
 
-        try {
-            session.close(new CloseStatus(4400, "Duplicate WebSocket connection"));
-        } catch (IOException e) {
-            log.error("🔴 기존 WebSocket 세션 종료 실패. browserTabToken={}, sessionId={}", browserTabToken, session.getId());
-            return false;
+        if (session.isOpen()) {
+            try {
+                session.close(status);
+            } catch (IOException e) {
+                log.error("🔴 WebSocket 세션 종료 실패. browserTabToken={}, sessionId={}", browserTabToken, session.getId());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean tryCloseSession(WebSocketSession session, int code, String reason) {
+        String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
+
+        if (session.isOpen()) {
+            try {
+                session.close(new CloseStatus(code, reason));
+            } catch (IOException e) {
+                log.error("🔴 WebSocket 세션 종료 실패. browserTabToken={}, sessionId={}", browserTabToken, session.getId());
+                return false;
+            }
         }
         return true;
     }
