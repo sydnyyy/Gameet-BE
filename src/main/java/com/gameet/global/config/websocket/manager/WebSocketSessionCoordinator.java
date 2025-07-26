@@ -9,19 +9,19 @@ import org.springframework.web.socket.WebSocketSession;
 @RequiredArgsConstructor
 public class WebSocketSessionCoordinator {
 
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final WebSocketSessionRegistry webSocketSessionRegistry;
     private final WebSocketSessionCloser webSocketSessionCloser;
 
     public boolean registerSession(WebSocketSession session) {
-        return webSocketSessionManager.register(session);
+        return webSocketSessionRegistry.register(session);
     }
 
     public void closeSession(WebSocketSession session) {
-        webSocketSessionManager.unregisterSession(session);
+        webSocketSessionRegistry.unregisterSession(session);
         webSocketSessionCloser.tryCloseSession(session, CloseStatus.NORMAL);
     }
 
     public void closeSessionsOnLogout(Long userId) {
-        webSocketSessionManager.closeSessionsOnLogout(userId);
+        webSocketSessionRegistry.closeSessionsOnLogout(userId);
     }
 }

@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class WebSocketSessionManager {
+public class WebSocketSessionRegistry {
 
     private final Map<Long, Set<String>> userClients = new ConcurrentHashMap<>();  // { userId, clientId }
     private final Map<String, Set<String>> clientTabTokens = new ConcurrentHashMap<>();  // { clientId, browserTabToken }
