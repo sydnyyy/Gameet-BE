@@ -32,6 +32,7 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
 
         String token = getWebSocketToken(request);
         String clientId = getClientId(request);
+        Long userId = jwtUtil.getUserIdFromToken(token);
 
         if (token == null || token.isBlank()) {
             log.warn("[beforeHandshake] Missing WebSocket token in handshake request");
@@ -45,12 +46,15 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
             return false;
         }
 
+        if (clientId == null || clientId.isBlank()) {
+            log.warn("[beforeHandshake] Missing or empty Client ID in handshake request. URI: {}", request.getURI());
+            response.setStatusCode(HttpStatus.BAD_REQUEST);
+            return false;
+        }
+
         attributes.put(WEBSOCKET_TOKEN_KEY, token);
-
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        attributes.put(USER_ID_KEY, userId);
-
         attributes.put(CLIENT_ID_KEY, clientId);
+        attributes.put(USER_ID_KEY, userId);
 
         log.info("[beforeHandshake] Valid websocket token: {}", token);
 
