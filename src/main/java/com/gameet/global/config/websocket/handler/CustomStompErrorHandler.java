@@ -2,7 +2,7 @@ package com.gameet.global.config.websocket.handler;
 
 import com.gameet.common.service.DiscordNotifier;
 import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
-import com.gameet.global.config.websocket.manager.WebSocketSessionManager;
+import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.socket.CloseStatus;
@@ -16,14 +16,14 @@ import java.nio.channels.ClosedChannelException;
 public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
 
     private final DiscordNotifier discordNotifier;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final WebSocketSessionCoordinator webSocketSessionCoordinator;
 
     public CustomStompErrorHandler(WebSocketHandler delegate,
                                    DiscordNotifier discordNotifier,
-                                   WebSocketSessionManager webSocketSessionManager) {
+                                   WebSocketSessionCoordinator webSocketSessionCoordinator) {
         super(delegate);
         this.discordNotifier = discordNotifier;
-        this.webSocketSessionManager = webSocketSessionManager;
+        this.webSocketSessionCoordinator = webSocketSessionCoordinator;
     }
 
     @Override
@@ -41,19 +41,19 @@ public class CustomStompErrorHandler extends WebSocketHandlerDecorator {
 
     @Override
     public void afterConnectionClosed(@NotNull WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        String userId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY).toString();
+        String webSocketToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
 
         if (closeStatus.getCode() != CloseStatus.NORMAL.getCode()) {
-            log.warn("🔴 비정상적인 WebSocket 연결 종료. User ID: {}, Session ID: {}, 상태: {}", userId, session.getId(), closeStatus);
+            log.warn("🔴 비정상적인 WebSocket 연결 종료. webSocketToken={}, sessionId={}, 상태: {}", webSocketToken, session.getId(), closeStatus);
             discordNotifier.send(
                     "🔴 WebSocket 세션 비정상 종료 감지",
-                    "- User ID: " + userId + "\n"
-                            + "- Session ID: " + session.getId() + "\n");
+                    "- WebSocket Token=" + webSocketToken + "\n"
+                            + "- Session ID=" + session.getId() + "\n");
         } else {
-            log.info("🟢 WebSocket 연결 정상 종료. User ID: {}, Session ID: {}", userId, session.getId());
+            log.info("🟢 WebSocket 연결 정상 종료. webSocketToken={}, sessionId={}", webSocketToken, session.getId());
         }
 
-        webSocketSessionManager.unregister(userId);
+        webSocketSessionCoordinator.closeSession(session);
         super.afterConnectionClosed(session, closeStatus);
     }
 
