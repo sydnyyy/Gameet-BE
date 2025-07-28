@@ -84,9 +84,9 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
                                Exception exception) {
 
         if (exception != null) {
-            log.warn("WebSocket handshake failed", exception);
+            log.warn("🔴 WebSocket handshake failed. Address={}", request.getRemoteAddress(), exception);
         } else {
-            log.info("WebSocket handshake succeeded from: {}", request.getRemoteAddress());
+            log.info("🟢 WebSocket handshake succeeded. Address={}", request.getRemoteAddress());
         }
     }
 }
