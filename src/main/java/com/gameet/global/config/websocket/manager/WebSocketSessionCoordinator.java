@@ -24,4 +24,8 @@ public class WebSocketSessionCoordinator {
     public void closeSessionsOnLogout(Long userId) {
         webSocketSessionRegistry.closeSessionsOnLogout(userId);
     }
+
+    public boolean hasSession(String tabWebSocketToken) {
+        return webSocketSessionRegistry.hasSession(tabWebSocketToken);
+    }
 }

@@ -3,7 +3,6 @@ package com.gameet.global.config.websocket.handler;
 import com.gameet.global.config.websocket.interceptor.WebSocketAuthHandshakeInterceptor;
 import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
@@ -22,14 +21,10 @@ public class CustomStompSessionHandler extends WebSocketHandlerDecorator {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
-        boolean success = webSocketSessionCoordinator.registerSession(session);
-        if (!success) {
-            log.warn("🟠 중복 WebSocket 연결 시도 감지(기존 세션 close 실패 & 현재 세션 강제 종료). browserTabToken={}", browserTabToken);
-            session.close(CloseStatus.PROTOCOL_ERROR);
-        }
-        else  {
-            log.info("🟢 WebSocket 세션 연결. browserTabToken={}, sessionId={}", browserTabToken, session.getId());
-        }
+        webSocketSessionCoordinator.registerSession(session);
+
+        log.info("🟢 WebSocket 세션 등록. browserTabToken={}, sessionId={}", browserTabToken, session.getId());
+
         super.afterConnectionEstablished(session);
     }
 }

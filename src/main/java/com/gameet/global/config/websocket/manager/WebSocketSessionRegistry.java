@@ -98,4 +98,8 @@ public class WebSocketSessionRegistry {
                     });
         }
     }
+
+    public boolean hasSession(String tabWebSocketToken) {
+        return browserTabSessions.containsKey(tabWebSocketToken);
+    }
 }
