@@ -25,7 +25,7 @@ public class WebSocketSessionRegistry {
     private final WebSocketSessionCloser webSocketSessionCloser;
     private final DiscordNotifier discordNotifier;
 
-    public synchronized boolean register(WebSocketSession session) {
+    synchronized boolean register(WebSocketSession session) {
         Long userId = (Long) session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY);
         String clientId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.CLIENT_ID_KEY).toString();
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
@@ -54,7 +54,7 @@ public class WebSocketSessionRegistry {
         return true;
     }
 
-    public synchronized void unregisterSession(WebSocketSession session) {
+    synchronized void unregisterSession(WebSocketSession session) {
         if (closingSessionTokens.contains(session.getId())) {
             closingSessionTokens.remove(session.getId());
             return;
@@ -79,7 +79,7 @@ public class WebSocketSessionRegistry {
         });
     }
 
-    public synchronized void closeSessionsOnLogout(Long userId) {
+    synchronized void closeSessionsOnLogout(Long userId) {
         Set<String> clientIdsToRemove = userClients.remove(userId);
         if (clientIdsToRemove != null && !clientIdsToRemove.isEmpty()) {
             clientIdsToRemove
@@ -99,7 +99,7 @@ public class WebSocketSessionRegistry {
         }
     }
 
-    public boolean hasSession(String tabWebSocketToken) {
+    boolean hasSession(String tabWebSocketToken) {
         return browserTabSessions.containsKey(tabWebSocketToken);
     }
 }
