@@ -12,8 +12,8 @@ public class WebSocketSessionCoordinator {
     private final WebSocketSessionRegistry webSocketSessionRegistry;
     private final WebSocketSessionCloser webSocketSessionCloser;
 
-    public boolean registerSession(WebSocketSession session) {
-        return webSocketSessionRegistry.register(session);
+    public void registerSession(WebSocketSession session) {
+        webSocketSessionRegistry.register(session);
     }
 
     public void closeSession(WebSocketSession session) {

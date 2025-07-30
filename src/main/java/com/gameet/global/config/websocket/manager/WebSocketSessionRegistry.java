@@ -32,7 +32,7 @@ public class WebSocketSessionRegistry {
      *
      * @param session 등록할 새로운 WebSocket 세션
      */
-    synchronized boolean register(WebSocketSession session) {
+    synchronized void register(WebSocketSession session) {
         Long userId = (Long) session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY);
         String clientId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.CLIENT_ID_KEY).toString();
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
@@ -45,7 +45,7 @@ public class WebSocketSessionRegistry {
 
             browserTabSessions.remove(browserTabToken);
             if(!webSocketSessionCloser.tryCloseSession(existingSession, 4400, "Duplicate WebSocket connection")) {
-                return false;
+                log.error("🟠 기존 세션 {} 종료 실패. (새로운 세션 등록은 계속 진행)", existingSession.getId());
             }
 
             discordNotifier.send(
@@ -58,7 +58,6 @@ public class WebSocketSessionRegistry {
         browserTabSessions.put(browserTabToken, session);
         clientTabTokens.computeIfAbsent(clientId, clientIdKey -> ConcurrentHashMap.newKeySet()).add(browserTabToken);
         userClients.computeIfAbsent(userId, userIdKey -> ConcurrentHashMap.newKeySet()).add(clientId);
-        return true;
     }
 
     synchronized void unregisterSession(WebSocketSession session) {
