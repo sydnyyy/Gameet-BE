@@ -25,6 +25,13 @@ public class WebSocketSessionRegistry {
     private final WebSocketSessionCloser webSocketSessionCloser;
     private final DiscordNotifier discordNotifier;
 
+    /**
+     * 새로운 WebSocket 세션을 Registry에 등록
+     * 만약 같은 브라우저 탭 토큰을 가진 세션이 이미 존재할 경우,
+     * 기존 세션 연결 종료 -> 새로운 세션으로 교체 (탭에서 가장 마지막에 연결된 세션만 활성화)
+     *
+     * @param session 등록할 새로운 WebSocket 세션
+     */
     synchronized boolean register(WebSocketSession session) {
         Long userId = (Long) session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY);
         String clientId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.CLIENT_ID_KEY).toString();
