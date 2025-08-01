@@ -1,5 +1,6 @@
 package com.gameet.notification.service;
 
+import com.gameet.common.service.EmailNotifier;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.notification.dto.NotificationPayload;
@@ -18,7 +19,7 @@ import java.util.List;
 public class NotificationService {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final EmailService emailService;
+    private final EmailNotifier emailNotifier;
     private final MatchParticipantRepository matchParticipantRepository;
 
     public void sendMatchResult(List<Long> userId, MatchStatus matchStatus, Long matchRoomId) {
@@ -29,7 +30,7 @@ public class NotificationService {
         NotificationPayload payload = NotificationPayload.fromMatchResult(matchStatus, matchRoomId);
         sendWebNotification(userId, payload);
 
-        emailService.sendMatchResultAsync(userId, matchStatus);
+        emailNotifier.sendMatchResultAsync(userId, matchStatus);
     }
 
     @Async
@@ -41,7 +42,7 @@ public class NotificationService {
         NotificationPayload payload = NotificationPayload.fromMatchAppointment(matchAppointment);
         List<Long> userId = matchParticipantRepository.findUserIdsByMatchRoomId(matchAppointment.getMatchRoomId());
         userId.forEach(id -> {
-                    emailService.sendMatchAppointmentAsync(id, payload.content());
+                    emailNotifier.sendMatchAppointmentAsync(id, payload.content());
                     sendWebNotification(id, payload);
                 });
     }

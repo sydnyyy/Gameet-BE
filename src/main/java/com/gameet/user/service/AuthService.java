@@ -2,7 +2,7 @@ package com.gameet.user.service;
 
 import com.gameet.common.enums.EmailPurpose;
 import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
-import com.gameet.notification.service.EmailService;
+import com.gameet.common.service.EmailNotifier;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
 import com.gameet.user.enums.Role;
@@ -36,7 +36,7 @@ public class AuthService {
     public static final String HEADER_PASSWORD_RESET_TOKEN = "Password-Reset-Token";
 
     private final JwtUtil jwtUtil;
-    private final EmailService emailService;
+    private final EmailNotifier emailNotifier;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
@@ -169,7 +169,7 @@ public class AuthService {
 
         try {
             saveVerificationCode(toEmail, verificationCode, emailPurpose);
-            emailService.sendVerificationCode(toEmail, verificationCode, emailPurpose);
+            emailNotifier.sendVerificationCode(toEmail, verificationCode, emailPurpose);
         } catch (Exception e) {
             log.error("이메일 인증 코드 처리 실패", e);
             throw new CustomException(ErrorCode.EMAIL_SEND_FAIL);

@@ -1,4 +1,4 @@
-package com.gameet.notification.service;
+package com.gameet.common.service;
 
 import com.gameet.common.enums.EmailPurpose;
 import com.gameet.match.enums.MatchStatus;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EmailService {
+public class EmailNotifier {
 
     private final JavaMailSender javaMailSender;
     private final UserRepository userRepository;
