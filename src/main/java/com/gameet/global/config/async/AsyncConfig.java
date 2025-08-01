@@ -1,7 +1,6 @@
 package com.gameet.global.config.async;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
@@ -29,10 +28,13 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return (ex, method, params) -> {
-            log.error("비동기 예외 발생 - method: {}, exception: {}", method.getName(), ex.getMessage(), ex);
-        };
-    }
+    /*
+        비동기 예외 전역 처리
+     */
+//    @Override
+//    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+//        return (ex, method, params) -> {
+//            log.error("비동기 예외 발생 - method: {}, exception: {}", method.getName(), ex.getMessage(), ex);
+//        };
+//    }
 }

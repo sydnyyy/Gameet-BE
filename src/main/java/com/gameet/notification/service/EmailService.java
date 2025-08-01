@@ -1,23 +1,24 @@
 package com.gameet.notification.service;
 
 import com.gameet.common.enums.EmailPurpose;
-import com.gameet.global.exception.CustomException;
-import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.notification.entity.MatchEmailSendLog;
 import com.gameet.notification.enums.MessageType;
 import com.gameet.notification.repository.MatchEmailSendLogRepository;
 import com.gameet.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
@@ -35,12 +36,15 @@ public class EmailService {
 
     @Async("emailExecutor")
     public void sendMatchResultAsync(Long userId, MatchStatus matchStatus) {
-        String toEmail = userRepository.findEmailByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_EMAIL));
+        Optional<String> toEmail = userRepository.findEmailByUserId(userId);
+        if (toEmail.isEmpty()) {
+            log.error("이메일 발송 실패: userId '{}'에 해당하는 사용자의 이메일을 찾을 수 없음", userId);
+            return;
+        }
 
         String subject = MatchStatus.getMessage(matchStatus);
         String content = subject + "\n페이지에 접속해주세요!";
-        send(toEmail, subject, subject);
+        send(toEmail.get(), subject, subject);
 
         MatchEmailSendLog sendLog = MatchEmailSendLog.of(userId, MessageType.MATCH_RESULT, content, LocalDateTime.now());
         matchEmailSendLogRepository.save(sendLog);
@@ -48,11 +52,14 @@ public class EmailService {
 
     @Async("emailExecutor")
     public void sendMatchAppointmentAsync(Long userId, String subject) {
-        String toEmail = userRepository.findEmailByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_EMAIL));
+        Optional<String> toEmail = userRepository.findEmailByUserId(userId);
+        if (toEmail.isEmpty()) {
+            log.error("이메일 발송 실패: userId '{}'에 해당하는 사용자의 이메일을 찾을 수 없음", userId);
+            return;
+        }
 
         String content = subject + "\n게임에 접속해주세요!";
-        send(toEmail, subject, content);
+        send(toEmail.get(), subject, content);
 
         MatchEmailSendLog sendLog = MatchEmailSendLog.of(userId, MessageType.MATCH_RESULT, content, LocalDateTime.now());
         matchEmailSendLogRepository.save(sendLog);
