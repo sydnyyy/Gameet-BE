@@ -1,5 +1,6 @@
 package com.gameet.global.config.websocket.interceptor;
 
+import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
 import com.gameet.global.jwt.JwtUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,12 @@ import java.util.Map;
 @Slf4j
 public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
 
-    private final JwtUtil jwtUtil;
     public static final String WEBSOCKET_TOKEN_KEY = "websocket_token";
     public static final String CLIENT_ID_KEY = "client_id";
     public static final String USER_ID_KEY = "user_id";
+
+    private final JwtUtil jwtUtil;
+    private final WebSocketSessionCoordinator webSocketSessionCoordinator;
 
     @Override
     public boolean beforeHandshake(@NonNull ServerHttpRequest request,
@@ -30,19 +33,25 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
                                    @NonNull WebSocketHandler wsHandler,
                                    @NonNull Map<String, Object> attributes) throws Exception {
 
-        String token = getWebSocketToken(request);
+        String tabWebSocketToken = getWebSocketToken(request);
         String clientId = getClientId(request);
-        Long userId = jwtUtil.getUserIdFromToken(token);
+        Long userId = jwtUtil.getUserIdFromToken(tabWebSocketToken);
 
-        if (token == null || token.isBlank()) {
-            log.warn("[beforeHandshake] Missing WebSocket token in handshake request");
+        if (tabWebSocketToken == null || tabWebSocketToken.isBlank()) {
+            log.warn("[beforeHandshake] Missing Tab WebSocket token in handshake request");
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
             return false;
         }
 
-        if (!jwtUtil.validateToken(token)) {
-            log.warn("[beforeHandshake] Invalid WebSocket token");
+        if (!jwtUtil.validateToken(tabWebSocketToken)) {
+            log.warn("[beforeHandshake] Invalid Tab WebSocket token");
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return false;
+        }
+
+        if (webSocketSessionCoordinator.hasSession(tabWebSocketToken)) {
+            log.warn("🟠 중복 WebSocket 연결 시도 감지 (새로운 세션 연결 요청 중단). tabWebSocketToken={}", tabWebSocketToken);
+            response.setStatusCode(HttpStatus.CONFLICT);
             return false;
         }
 
@@ -52,11 +61,11 @@ public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {
             return false;
         }
 
-        attributes.put(WEBSOCKET_TOKEN_KEY, token);
+        attributes.put(WEBSOCKET_TOKEN_KEY, tabWebSocketToken);
         attributes.put(CLIENT_ID_KEY, clientId);
         attributes.put(USER_ID_KEY, userId);
 
-        log.info("[beforeHandshake] Valid websocket token: {}", token);
+        log.info("[beforeHandshake] Valid tabWebSocketToken={}", tabWebSocketToken);
 
         return true;
     }

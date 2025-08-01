@@ -25,7 +25,14 @@ public class WebSocketSessionRegistry {
     private final WebSocketSessionCloser webSocketSessionCloser;
     private final DiscordNotifier discordNotifier;
 
-    public synchronized boolean register(WebSocketSession session) {
+    /**
+     * 새로운 WebSocket 세션을 Registry에 등록
+     * 만약 같은 브라우저 탭 토큰을 가진 세션이 이미 존재할 경우,
+     * 기존 세션 연결 종료 -> 새로운 세션으로 교체 (탭에서 가장 마지막에 연결된 세션만 활성화)
+     *
+     * @param session 등록할 새로운 WebSocket 세션
+     */
+    synchronized void register(WebSocketSession session) {
         Long userId = (Long) session.getAttributes().get(WebSocketAuthHandshakeInterceptor.USER_ID_KEY);
         String clientId = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.CLIENT_ID_KEY).toString();
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
@@ -38,7 +45,7 @@ public class WebSocketSessionRegistry {
 
             browserTabSessions.remove(browserTabToken);
             if(!webSocketSessionCloser.tryCloseSession(existingSession, 4400, "Duplicate WebSocket connection")) {
-                return false;
+                log.error("🟠 기존 세션 {} 종료 실패. (새로운 세션 등록은 계속 진행)", existingSession.getId());
             }
 
             discordNotifier.send(
@@ -51,10 +58,9 @@ public class WebSocketSessionRegistry {
         browserTabSessions.put(browserTabToken, session);
         clientTabTokens.computeIfAbsent(clientId, clientIdKey -> ConcurrentHashMap.newKeySet()).add(browserTabToken);
         userClients.computeIfAbsent(userId, userIdKey -> ConcurrentHashMap.newKeySet()).add(clientId);
-        return true;
     }
 
-    public synchronized void unregisterSession(WebSocketSession session) {
+    synchronized void unregisterSession(WebSocketSession session) {
         if (closingSessionTokens.contains(session.getId())) {
             closingSessionTokens.remove(session.getId());
             return;
@@ -79,7 +85,7 @@ public class WebSocketSessionRegistry {
         });
     }
 
-    public synchronized void closeSessionsOnLogout(Long userId) {
+    synchronized void closeSessionsOnLogout(Long userId) {
         Set<String> clientIdsToRemove = userClients.remove(userId);
         if (clientIdsToRemove != null && !clientIdsToRemove.isEmpty()) {
             clientIdsToRemove
@@ -97,5 +103,9 @@ public class WebSocketSessionRegistry {
                         }
                     });
         }
+    }
+
+    boolean hasSession(String tabWebSocketToken) {
+        return browserTabSessions.containsKey(tabWebSocketToken);
     }
 }

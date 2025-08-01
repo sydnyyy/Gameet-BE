@@ -12,7 +12,7 @@ import java.io.IOException;
 @Slf4j
 public class WebSocketSessionCloser {
 
-    public boolean tryCloseSession(WebSocketSession session, CloseStatus status) {
+    boolean tryCloseSession(WebSocketSession session, CloseStatus status) {
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
 
         if (session.isOpen()) {
@@ -26,7 +26,7 @@ public class WebSocketSessionCloser {
         return true;
     }
 
-    public boolean tryCloseSession(WebSocketSession session, int code, String reason) {
+    boolean tryCloseSession(WebSocketSession session, int code, String reason) {
         String browserTabToken = session.getAttributes().get(WebSocketAuthHandshakeInterceptor.WEBSOCKET_TOKEN_KEY).toString();
 
         if (session.isOpen()) {
