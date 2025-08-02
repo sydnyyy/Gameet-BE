@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class EmailNotifier {
+public class LegacyEmailNotifier {
 
     private final JavaMailSender javaMailSender;
 
