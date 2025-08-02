@@ -166,10 +166,18 @@ public class AuthService {
         }
 
         String verificationCode = generateRandomCode();
-
         try {
             saveVerificationCode(toEmail, verificationCode, emailPurpose);
-            emailNotifier.sendVerificationCode(toEmail, verificationCode, emailPurpose);
+            String subject = emailPurpose.getDescription() + " 이메일 인증 코드입니다.";
+            String content = String.format(
+                    """
+                            인증 코드는 %s 입니다.
+                            인증 코드 입력 기한은 5분입니다.
+                            코드를 공유하지 마세요.
+                    """,
+                    verificationCode
+            );
+            emailNotifier.sendAsync(toEmail, subject, content);
         } catch (Exception e) {
             log.error("이메일 인증 코드 처리 실패", e);
             throw new CustomException(ErrorCode.EMAIL_SEND_FAIL);
