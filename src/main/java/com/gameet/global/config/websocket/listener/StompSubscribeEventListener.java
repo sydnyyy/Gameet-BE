@@ -1,6 +1,6 @@
 package com.gameet.global.config.websocket.listener;
 
-import com.gameet.notification.dto.WebSocketPayload;
+import com.gameet.notification.dto.response.WebSocketPayload;
 import com.gameet.notification.enums.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

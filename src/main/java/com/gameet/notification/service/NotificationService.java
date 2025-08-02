@@ -4,7 +4,7 @@ import com.gameet.common.enums.AlertLevel;
 import com.gameet.common.service.DiscordNotifier;
 import com.gameet.global.exception.CriticalDataException;
 import com.gameet.match.entity.MatchAppointment;
-import com.gameet.notification.dto.WebSocketPayload;
+import com.gameet.notification.dto.response.WebSocketPayload;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.user.repository.UserRepository;
 import jakarta.annotation.Resource;

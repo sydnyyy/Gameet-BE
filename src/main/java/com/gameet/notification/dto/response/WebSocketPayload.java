@@ -1,4 +1,4 @@
-package com.gameet.notification.dto;
+package com.gameet.notification.dto.response;
 
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.enums.MatchStatus;

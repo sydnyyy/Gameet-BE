@@ -10,7 +10,7 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.entity.MatchRoom;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.repository.MatchRoomRepository;
-import com.gameet.notification.dto.WebSocketPayload;
+import com.gameet.notification.dto.response.WebSocketPayload;
 import com.gameet.notification.service.NotificationService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

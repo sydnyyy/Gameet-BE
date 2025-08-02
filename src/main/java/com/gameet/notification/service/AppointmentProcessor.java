@@ -6,7 +6,7 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.dto.response.ParticipantInfoDto;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.repository.MatchParticipantRepository;
-import com.gameet.notification.dto.WebSocketPayload;
+import com.gameet.notification.dto.response.WebSocketPayload;
 import com.gameet.notification.enums.EmailSendingStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
