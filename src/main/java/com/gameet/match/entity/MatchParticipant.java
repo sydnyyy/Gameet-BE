@@ -2,6 +2,7 @@ package com.gameet.match.entity;
 
 import com.gameet.common.entity.BaseTimeEntity;
 import com.gameet.match.dto.insert.MatchParticipantInsert;
+import com.gameet.notification.enums.EmailSendingStatus;
 import com.gameet.user.entity.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +40,11 @@ public class MatchParticipant extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "matchParticipant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MatchReportLog> matchReportLog;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EmailSendingStatus emailSendingStatus = EmailSendingStatus.PENDING;
 
     @Column(name = "last_read_at")
     private LocalDateTime lastReadAt;
