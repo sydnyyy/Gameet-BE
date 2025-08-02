@@ -1,4 +1,4 @@
-package com.gameet.common.service;
+package com.gameet.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;

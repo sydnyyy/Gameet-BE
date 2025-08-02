@@ -2,7 +2,7 @@ package com.gameet.user.service;
 
 import com.gameet.common.enums.EmailPurpose;
 import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
-import com.gameet.common.service.EmailNotifier;
+import com.gameet.notification.service.EmailNotifier;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
 import com.gameet.user.enums.Role;

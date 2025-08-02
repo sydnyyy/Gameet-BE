@@ -2,7 +2,6 @@ package com.gameet.notification.service;
 
 import com.gameet.common.enums.AlertLevel;
 import com.gameet.common.service.DiscordNotifier;
-import com.gameet.common.service.EmailNotifier;
 import com.gameet.global.exception.CriticalDataException;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.notification.dto.WebSocketPayload;

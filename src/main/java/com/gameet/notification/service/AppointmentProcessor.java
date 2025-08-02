@@ -1,6 +1,5 @@
 package com.gameet.notification.service;
 
-import com.gameet.common.service.EmailNotifier;
 import com.gameet.global.exception.CriticalDataException;
 import com.gameet.global.exception.CustomException;
 import com.gameet.global.exception.ErrorCode;
