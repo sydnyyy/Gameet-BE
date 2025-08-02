@@ -48,6 +48,10 @@ public class NotificationService {
 
     @Async
     public void sendMatchAppointmentAsync(List<MatchAppointment> matchAppointments) {
+        if (matchAppointments == null || matchAppointments.isEmpty()) {
+            return;
+        }
+
         matchAppointments.forEach(this::sendMatchAppointment);
     }
 

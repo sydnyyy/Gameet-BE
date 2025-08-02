@@ -25,6 +25,8 @@ public class MatchAppointmentNotificationScheduler {
         LocalDateTime targetDateTime = LocalDateTime.of(LocalDate.now(), targetTime);
 
         List<MatchAppointment> matchAppointments = matchAppointmentRepository.findAllByAppointmentAt(targetDateTime);
-        notificationService.sendMatchAppointmentAsync(matchAppointments);
+        if (matchAppointments != null && !matchAppointments.isEmpty()) {
+            notificationService.sendMatchAppointmentAsync(matchAppointments);
+        }
     }
 }
