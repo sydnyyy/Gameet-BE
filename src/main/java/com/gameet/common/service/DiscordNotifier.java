@@ -1,5 +1,6 @@
 package com.gameet.common.service;
 
+import com.gameet.common.enums.AlertLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,11 @@ public class DiscordNotifier {
     @Value("${discord.webhook.websocket-uri}")
     private String websocketWebHookUrl;
 
-    public void send(String title, String description) {
+    public void send(String title, String description, AlertLevel type) {
         Map<String, Object> embed = new HashMap<>();
         embed.put("title", title);
         embed.put("description", description);
-        embed.put("color", 0xFF0000);
+        embed.put("color", type.getColor());
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("embeds", List.of(embed));
