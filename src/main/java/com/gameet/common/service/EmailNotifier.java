@@ -21,7 +21,7 @@ public class EmailNotifier {
         javaMailSender.send(message);
     }
 
-    @Async("emailExecutor")
+    @Async("defaultEmailExecutor")
     public void sendAsync(String toEmail, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
