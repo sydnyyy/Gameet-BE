@@ -1,6 +1,7 @@
 package com.gameet.notification.service;
 
 import com.gameet.common.service.EmailNotifier;
+import com.gameet.match.dto.response.ParticipantInfoDto;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.repository.MatchParticipantRepository;
 import com.gameet.notification.dto.NotificationPayload;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,19 +53,19 @@ public class NotificationService {
 
     private void sendMatchAppointment(MatchAppointment matchAppointment) {
         NotificationPayload payload = NotificationPayload.fromMatchAppointment(matchAppointment);
-        List<Long> userId = matchParticipantRepository.findUserIdsByMatchRoomId(matchAppointment.getMatchRoomId());
-        userId.forEach(id -> {
-            sendWebNotification(id, payload);
 
-            Optional<String> toEmail = userRepository.findEmailByUserId(id);
-            if (toEmail.isEmpty()) {
-                log.error("[sendMatchResult] userId={} 의 이메일 존재하지 않음", id);
+        List<ParticipantInfoDto> participantInfoDtos = matchParticipantRepository.findParticipantInfoByMatchRoomId(matchAppointment.getMatchRoomId());
+        participantInfoDtos.forEach(participantInfoDto -> {
+            sendWebNotification(participantInfoDto.userId(), payload);
+
+            if (!StringUtils.hasText(participantInfoDto.email())) {
+                log.error("[sendMatchAppointment] userId={} 의 이메일 존재하지 않음", participantInfoDto.userId());
                 return;
             }
 
             String subject = payload.content();
             String content = subject + "\n게임에 접속해주세요!";
-            emailNotifier.sendAsync(toEmail.get(), subject, content);
+            emailNotifier.sendAsync(participantInfoDto.email(), subject, content);
         });
     }
 

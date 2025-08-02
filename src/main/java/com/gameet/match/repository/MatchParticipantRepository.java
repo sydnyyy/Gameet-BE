@@ -1,5 +1,6 @@
 package com.gameet.match.repository;
 
+import com.gameet.match.dto.response.ParticipantInfoDto;
 import com.gameet.match.entity.MatchParticipant;
 import com.gameet.match.enums.MatchStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,6 +29,15 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
         WHERE mp.matchRoom.matchRoomId = :matchRoomId
     """)
     List<Long> findUserIdsByMatchRoomId(@Param("matchRoomId") Long matchRoomId);
+
+    @Query("""
+        SELECT new com.gameet.match.dto.response.ParticipantInfoDto(u.userId, u.email)
+        FROM MatchParticipant mp
+        JOIN mp.userProfile up
+        JOIN up.user u
+        WHERE mp.matchRoom.matchRoomId = :matchRoomId
+    """)
+    List<ParticipantInfoDto> findParticipantInfoByMatchRoomId(@Param("matchRoomId") Long matchRoomId);
 
     @Query("""
         SELECT mp.matchRoom.matchRoomId
