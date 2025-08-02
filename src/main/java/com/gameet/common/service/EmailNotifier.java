@@ -12,6 +12,15 @@ public class EmailNotifier {
 
     private final JavaMailSender javaMailSender;
 
+    public void send(String toEmail, String subject, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("[Gameet] " + subject);
+        message.setText(content);
+
+        javaMailSender.send(message);
+    }
+
     @Async("emailExecutor")
     public void sendAsync(String toEmail, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
