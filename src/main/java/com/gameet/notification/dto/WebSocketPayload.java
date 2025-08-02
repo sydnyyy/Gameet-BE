@@ -7,7 +7,7 @@ import com.gameet.notification.enums.MessageType;
 import lombok.Builder;
 
 @Builder
-public record NotificationPayload (
+public record WebSocketPayload (
         MessageType messageType,
         MatchStatus matchStatus,
         Long matchRoomId,
@@ -15,8 +15,8 @@ public record NotificationPayload (
         Long senderId
 ) {
 
-    public static NotificationPayload fromMatchResult(MatchStatus matchStatus, Long matchRoomId) {
-        return NotificationPayload.builder()
+    public static WebSocketPayload fromMatchResult(MatchStatus matchStatus, Long matchRoomId) {
+        return WebSocketPayload.builder()
                 .messageType(MessageType.MATCH_RESULT)
                 .matchStatus(matchStatus)
                 .matchRoomId(matchRoomId)
@@ -24,8 +24,8 @@ public record NotificationPayload (
                 .build();
     }
 
-    public static NotificationPayload fromMatchAppointment(MatchAppointment matchAppointment) {
-        return NotificationPayload.builder()
+    public static WebSocketPayload fromMatchAppointment(MatchAppointment matchAppointment) {
+        return WebSocketPayload.builder()
                 .messageType(MessageType.MATCH_APPOINTMENT)
                 .matchStatus(MatchStatus.MATCHED)
                 .matchRoomId(matchAppointment.getMatchRoomId())
@@ -33,8 +33,8 @@ public record NotificationPayload (
                 .build();
     }
 
-    public static NotificationPayload fromStompSubscribeEvent(String destination) {
-        return NotificationPayload.builder()
+    public static WebSocketPayload fromStompSubscribeEvent(String destination) {
+        return WebSocketPayload.builder()
                 .messageType(MessageType.STOMP_SUBSCRIBE)
                 .matchStatus(null)
                 .matchRoomId(null)
@@ -43,8 +43,8 @@ public record NotificationPayload (
 
     }
 
-    public static NotificationPayload fromMatchChat(Long matchRoomId, Long senderId) {
-        return NotificationPayload.builder()
+    public static WebSocketPayload fromMatchChat(Long matchRoomId, Long senderId) {
+        return WebSocketPayload.builder()
                 .messageType(MessageType.CHAT)
                 .matchStatus(null)
                 .matchRoomId(matchRoomId)
@@ -54,15 +54,15 @@ public record NotificationPayload (
 
     }
 
-    public static NotificationPayload fromStompSubscribe(MessageType messageType, String destination) {
-        return NotificationPayload.builder()
+    public static WebSocketPayload fromStompSubscribe(MessageType messageType, String destination) {
+        return WebSocketPayload.builder()
                 .messageType(messageType)
                 .content(destination + " 구독 성공")
                 .build();
     }
 
-    public static NotificationPayload fromError(MessageType messageType) {
-        return NotificationPayload.builder()
+    public static WebSocketPayload fromError(MessageType messageType) {
+        return WebSocketPayload.builder()
                 .messageType(messageType)
                 .content(messageType.name())
                 .build();

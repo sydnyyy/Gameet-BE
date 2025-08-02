@@ -1,6 +1,6 @@
 package com.gameet.global.config.websocket.listener;
 
-import com.gameet.notification.dto.NotificationPayload;
+import com.gameet.notification.dto.WebSocketPayload;
 import com.gameet.notification.enums.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class StompSubscribeEventListener implements ApplicationListener<SessionS
         String username = principal.getName();
         log.info("[onApplicationEvent] Subscription received. user: {}, destination: {}", username, destination);
 
-        NotificationPayload payload = getNotificationPayload(destination);
+        WebSocketPayload payload = getNotificationPayload(destination);
 
         if (TOPIC_NOTIFICATION_DESTINATION.equals(destination)) {
             messagingTemplate.convertAndSend("/topic/notify", payload);
@@ -48,16 +48,16 @@ public class StompSubscribeEventListener implements ApplicationListener<SessionS
         }
     }
 
-    private NotificationPayload getNotificationPayload(String destination) {
+    private WebSocketPayload getNotificationPayload(String destination) {
         if (destination == null || destination.isBlank()) {
-            return NotificationPayload.fromError(MessageType.ERROR_EMPTY_DESTINATION);
+            return WebSocketPayload.fromError(MessageType.ERROR_EMPTY_DESTINATION);
         }
         if (destination.startsWith("/user")) {
-            return NotificationPayload.fromStompSubscribe(MessageType.STOMP_SUBSCRIBE_USER, destination);
+            return WebSocketPayload.fromStompSubscribe(MessageType.STOMP_SUBSCRIBE_USER, destination);
         }
         if (destination.startsWith("/topic")) {
-            return NotificationPayload.fromStompSubscribe(MessageType.STOMP_SUBSCRIBE_TOPIC, destination);
+            return WebSocketPayload.fromStompSubscribe(MessageType.STOMP_SUBSCRIBE_TOPIC, destination);
         }
-        return NotificationPayload.fromError(MessageType.ERROR_INVALID_DESTINATION);
+        return WebSocketPayload.fromError(MessageType.ERROR_INVALID_DESTINATION);
     }
 }

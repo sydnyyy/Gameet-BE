@@ -7,7 +7,7 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.dto.response.ParticipantInfoDto;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.repository.MatchParticipantRepository;
-import com.gameet.notification.dto.NotificationPayload;
+import com.gameet.notification.dto.WebSocketPayload;
 import com.gameet.notification.enums.EmailSendingStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class AppointmentProcessor {
 
     @Transactional
     public void notifyParticipantsOfAppointment(MatchAppointment matchAppointment) {
-        NotificationPayload payload = NotificationPayload.fromMatchAppointment(matchAppointment);
+        WebSocketPayload payload = WebSocketPayload.fromMatchAppointment(matchAppointment);
 
         List<Long> successUserIds = new ArrayList<>();
         Map<Long, Exception> failedUsers = new HashMap<>();
@@ -78,7 +78,7 @@ public class AppointmentProcessor {
         }
     }
 
-    private void sendWebNotification(Long userId, NotificationPayload payload) {
+    private void sendWebNotification(Long userId, WebSocketPayload payload) {
         simpMessagingTemplate.convertAndSendToUser(
                 String.valueOf(userId),
                 "/queue/notify",

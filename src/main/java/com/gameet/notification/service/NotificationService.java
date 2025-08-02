@@ -5,7 +5,7 @@ import com.gameet.common.service.DiscordNotifier;
 import com.gameet.common.service.EmailNotifier;
 import com.gameet.global.exception.CriticalDataException;
 import com.gameet.match.entity.MatchAppointment;
-import com.gameet.notification.dto.NotificationPayload;
+import com.gameet.notification.dto.WebSocketPayload;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.user.repository.UserRepository;
 import jakarta.annotation.Resource;
@@ -41,7 +41,7 @@ public class NotificationService {
     }
 
     public void sendMatchResult(Long userId, MatchStatus matchStatus, Long matchRoomId) {
-        NotificationPayload payload = NotificationPayload.fromMatchResult(matchStatus, matchRoomId);
+        WebSocketPayload payload = WebSocketPayload.fromMatchResult(matchStatus, matchRoomId);
         sendWebNotification(userId, payload);
 
         Optional<String> toEmail = userRepository.findEmailByUserId(userId);
@@ -101,11 +101,11 @@ public class NotificationService {
     }
 
     public void sendChatNotification(Long receiverUserId, Long matchRoomId, Long senderId) {
-        NotificationPayload payload = NotificationPayload.fromMatchChat(matchRoomId, senderId);
+        WebSocketPayload payload = WebSocketPayload.fromMatchChat(matchRoomId, senderId);
         sendWebNotification(receiverUserId, payload);
     }
 
-    private void sendWebNotification(Long userId, NotificationPayload payload) {
+    private void sendWebNotification(Long userId, WebSocketPayload payload) {
         simpMessagingTemplate.convertAndSendToUser(
                 String.valueOf(userId),
                 "/queue/notify",
