@@ -3,9 +3,12 @@ package com.gameet.match.repository;
 import com.gameet.match.dto.response.ParticipantInfoDto;
 import com.gameet.match.entity.MatchParticipant;
 import com.gameet.match.enums.MatchStatus;
+import com.gameet.notification.enums.EmailSendingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -90,4 +93,13 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     """)
     Optional<MatchParticipant> findMatchedParticipantByUserProfileId(@Param("userProfileId") Long userProfileId);
 
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("""
+        UPDATE MatchParticipant mp
+        SET mp.emailSendingStatus = :status 
+        WHERE mp.userProfile.userProfileId IN :userProfileIds
+    """)
+    void updateStatusByUserProfileIds(@Param("userProfileIds") List<Long> userProfileIds,
+                                      @Param("status") EmailSendingStatus status);
 }

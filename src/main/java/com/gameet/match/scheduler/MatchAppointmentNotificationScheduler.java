@@ -26,7 +26,7 @@ public class MatchAppointmentNotificationScheduler {
 
         List<MatchAppointment> matchAppointments = matchAppointmentRepository.findAllByAppointmentAt(targetDateTime);
         if (matchAppointments != null && !matchAppointments.isEmpty()) {
-            notificationService.sendMatchAppointmentAsync(matchAppointments);
+            notificationService.notifyAllAppointmentsAsync(matchAppointments);
         }
     }
 }
