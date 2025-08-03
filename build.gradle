@@ -39,6 +39,7 @@ dependencies {
 
     // mail
     implementation 'org.springframework.boot:spring-boot-starter-mail:3.4.2'
+    implementation 'software.amazon.awssdk:sesv2:2.32.12'
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'

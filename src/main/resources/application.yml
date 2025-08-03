@@ -37,6 +37,12 @@ jwt:
   issuer: ${JWT_ISSUER}
   secret_key: ${JWT_SECRET_KEY}
 
+aws:
+  ses:
+    access_key: ${AWS_SES_ACCESS_KEY}
+    secret_key: ${AWS_SES_SECRET_KEY}
+    region: ${AWS_SES_REGION}
+
 logging:
   level:
     org.springframework.messaging: DEBUG
