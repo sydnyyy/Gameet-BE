@@ -2,7 +2,9 @@ package com.gameet.user.service;
 
 import com.gameet.common.enums.EmailPurpose;
 import com.gameet.global.config.websocket.manager.WebSocketSessionCoordinator;
-import com.gameet.notification.service.EmailService;
+import com.gameet.notification.dto.TemplatedEmailRequest;
+import com.gameet.notification.enums.AwsSesTemplateType;
+import com.gameet.notification.service.AwsSesEmailNotifier;
 import com.gameet.user.dto.request.LoginRequest;
 import com.gameet.user.dto.request.SignUpRequest;
 import com.gameet.user.enums.Role;
@@ -27,6 +29,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +39,7 @@ public class AuthService {
     public static final String HEADER_PASSWORD_RESET_TOKEN = "Password-Reset-Token";
 
     private final JwtUtil jwtUtil;
-    private final EmailService emailService;
+    private final AwsSesEmailNotifier emailNotifier;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
@@ -166,10 +169,18 @@ public class AuthService {
         }
 
         String verificationCode = generateRandomCode();
-
         try {
             saveVerificationCode(toEmail, verificationCode, emailPurpose);
-            emailService.sendVerificationCode(toEmail, verificationCode, emailPurpose);
+
+            TemplatedEmailRequest templatedEmailRequest = TemplatedEmailRequest.builder()
+                    .toEmail(toEmail)
+                    .awsSesTemplateType(AwsSesTemplateType.EMAIL_VERIFICATION)
+                    .templateData(Map.of(
+                            "emailPurpose", emailPurpose.getDescription(),
+                            "verificationCode", verificationCode))
+                    .build();
+
+            emailNotifier.sendTemplatedEmail(templatedEmailRequest);
         } catch (Exception e) {
             log.error("이메일 인증 코드 처리 실패", e);
             throw new CustomException(ErrorCode.EMAIL_SEND_FAIL);

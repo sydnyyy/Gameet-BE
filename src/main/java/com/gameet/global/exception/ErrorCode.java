@@ -43,7 +43,10 @@ public enum ErrorCode {
     NOT_FOUND_MATCH_PARTICIPANT(HttpStatus.BAD_REQUEST, "매칭 참가자가 존재하지 않습니다."),
     ALREADY_MATCH_MANNER_EVALUATION(HttpStatus.BAD_REQUEST, "이미 매너 평가가 완료되어 추가 평가가 불가능합니다."),
     ALREADY_MATCH_REPORT(HttpStatus.BAD_REQUEST, "이미 신고가 완료되어 추가 신고가 불가능합니다."),
-    ALREADY_MATCH_APPOINTED(HttpStatus.BAD_REQUEST, "이미 약속이 설정되어 있습니다.")
+    ALREADY_MATCH_APPOINTED(HttpStatus.BAD_REQUEST, "이미 약속이 설정되어 있습니다."),
+
+    // JSON
+    JSON_PROCESSING_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 작업 실패")
     ;
 
     private final HttpStatus status;

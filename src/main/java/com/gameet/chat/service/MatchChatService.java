@@ -2,7 +2,6 @@ package com.gameet.chat.service;
 
 import com.gameet.chat.dto.ChatMessage;
 import com.gameet.chat.dto.MatchParticipantsInfoResponse;
-import com.gameet.chat.dto.UnreadChatResponse;
 import com.gameet.chat.entity.MatchChat;
 import com.gameet.notification.enums.MessageType;
 import com.gameet.chat.repository.MatchChatRepository;
@@ -11,7 +10,7 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.entity.MatchRoom;
 import com.gameet.match.enums.MatchStatus;
 import com.gameet.match.repository.MatchRoomRepository;
-import com.gameet.notification.dto.NotificationPayload;
+import com.gameet.notification.dto.response.WebSocketPayload;
 import com.gameet.notification.service.NotificationService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -101,7 +100,7 @@ public class MatchChatService {
         for (MatchParticipant participant : participants) {
             String userId = participant.getUserProfile().getUserProfileId().toString();
 
-            NotificationPayload payload = NotificationPayload.builder()
+            WebSocketPayload payload = WebSocketPayload.builder()
                       .messageType(MessageType.MATCH_RESULT)
                       .matchStatus(MatchStatus.COMPLETED)
                       .matchRoomId(matchRoomId)
