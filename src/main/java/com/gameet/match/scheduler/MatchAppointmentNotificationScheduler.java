@@ -1,5 +1,6 @@
 package com.gameet.match.scheduler;
 
+import com.gameet.global.annotation.TrackAppointmentTaskTime;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.repository.MatchAppointmentRepository;
 import com.gameet.notification.service.NotificationService;
@@ -20,7 +21,8 @@ public class MatchAppointmentNotificationScheduler {
     private final NotificationService notificationService;
 
     @Scheduled(cron = "0 * * * * *")
-    public void schedule() {
+    @TrackAppointmentTaskTime(taskType = TrackAppointmentTaskTime.TaskType.DB_SCAN)
+    public List<MatchAppointment> schedule() {
         LocalTime targetTime = LocalTime.now().plusMinutes(10).withSecond(0).withNano(0);
         LocalDateTime targetDateTime = LocalDateTime.of(LocalDate.now(), targetTime);
 
@@ -28,5 +30,7 @@ public class MatchAppointmentNotificationScheduler {
         if (matchAppointments != null && !matchAppointments.isEmpty()) {
             notificationService.notifyAllAppointmentsAsync(matchAppointments);
         }
+
+        return matchAppointments;
     }
 }

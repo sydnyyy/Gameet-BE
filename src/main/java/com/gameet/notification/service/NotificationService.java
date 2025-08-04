@@ -2,6 +2,7 @@ package com.gameet.notification.service;
 
 import com.gameet.common.enums.AlertLevel;
 import com.gameet.common.service.DiscordNotifier;
+import com.gameet.global.annotation.TrackAppointmentTaskTime;
 import com.gameet.global.exception.CriticalDataException;
 import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.entity.MatchAppointment;
@@ -77,6 +78,7 @@ public class NotificationService {
     }
 
     @Async("appointmentNotificationExecutor")
+    @TrackAppointmentTaskTime(taskType = TrackAppointmentTaskTime.TaskType.ASYNC_EMAIL_SEND)
     public void notifyAllAppointmentsAsync(List<MatchAppointment> matchAppointments) {
         if (matchAppointments == null || matchAppointments.isEmpty()) {
             return;
