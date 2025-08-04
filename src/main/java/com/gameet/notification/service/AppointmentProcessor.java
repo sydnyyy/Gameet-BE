@@ -6,7 +6,9 @@ import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.dto.response.ParticipantInfoDto;
 import com.gameet.match.entity.MatchAppointment;
 import com.gameet.match.repository.MatchParticipantRepository;
+import com.gameet.notification.dto.TemplatedEmailRequest;
 import com.gameet.notification.dto.response.WebSocketPayload;
+import com.gameet.notification.enums.AwsSesTemplateType;
 import com.gameet.notification.enums.EmailSendingStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,7 @@ public class AppointmentProcessor {
 
     private final MatchParticipantRepository matchParticipantRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final EmailNotifier emailNotifier;
+    private final AwsSesEmailNotifier emailNotifier;
 
     @Transactional
     public void notifyParticipantsOfAppointment(MatchAppointment matchAppointment) {
@@ -37,23 +39,33 @@ public class AppointmentProcessor {
         Map<Long, Exception> failedUsers = new HashMap<>();
 
         List<ParticipantInfoDto> participantInfoDtos = matchParticipantRepository.findParticipantInfoByMatchRoomId(matchAppointment.getMatchRoomId());
+        List<TemplatedEmailRequest> templatedEmailRequests = new ArrayList<>();
+
         participantInfoDtos.forEach(participantInfoDto -> {
             try {
                 sendWebNotification(participantInfoDto.userId(), payload);
 
                 if (!StringUtils.hasText(participantInfoDto.email())) {
-                    log.error("[notifyParticipantsOfAppointment] userId=" + participantInfoDto.userId() + " 사용자의 이메일 존재하지 않음");
+                    log.error("[notifyParticipantsOfAppointment] userId={} 사용자의 이메일 존재하지 않음", participantInfoDto.userId());
                     throw new CriticalDataException(ErrorCode.NOT_FOUND_EMAIL.getMessage(), List.of(participantInfoDto.userId()));
                 }
-                String subject = payload.content();
-                String content = subject + "\n게임에 접속해주세요.";
-                emailNotifier.send(participantInfoDto.email(), subject, content);
+
+                TemplatedEmailRequest emailRequest = TemplatedEmailRequest.builder()
+                        .toEmail(participantInfoDto.email())
+                        .awsSesTemplateType(AwsSesTemplateType.APPOINTMENT)
+                        .templateData(Map.of(
+                                "time", matchAppointment.getAppointmentAt().toString()))
+                        .build();
+
+                templatedEmailRequests.add(emailRequest);
 
                 successUserIds.add(participantInfoDto.userId());
             } catch (Exception e) {
                 failedUsers.put(participantInfoDto.userId(), e);
             }
         });
+
+        emailNotifier.sendBulkTemplatedEmail(templatedEmailRequests);
 
         if (!successUserIds.isEmpty()) {
             matchParticipantRepository.updateStatusByUserProfileIds(successUserIds, EmailSendingStatus.SENT);

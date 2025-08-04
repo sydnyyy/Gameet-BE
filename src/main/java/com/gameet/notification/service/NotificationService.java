@@ -3,9 +3,12 @@ package com.gameet.notification.service;
 import com.gameet.common.enums.AlertLevel;
 import com.gameet.common.service.DiscordNotifier;
 import com.gameet.global.exception.CriticalDataException;
+import com.gameet.global.exception.ErrorCode;
 import com.gameet.match.entity.MatchAppointment;
+import com.gameet.notification.dto.TemplatedEmailRequest;
 import com.gameet.notification.dto.response.WebSocketPayload;
 import com.gameet.match.enums.MatchStatus;
+import com.gameet.notification.enums.AwsSesTemplateType;
 import com.gameet.user.repository.UserRepository;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +33,7 @@ public class NotificationService {
     private Executor appointmentNotificationExecutor;
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final EmailNotifier emailNotifier;
+    private final AwsSesEmailNotifier emailNotifier;
     private final UserRepository userRepository;
     private final AppointmentProcessor appointmentProcessor;
     private final DiscordNotifier discordNotifier;
@@ -40,18 +43,37 @@ public class NotificationService {
     }
 
     public void sendMatchResult(Long userId, MatchStatus matchStatus, Long matchRoomId) {
+        // 웹 알림
         WebSocketPayload payload = WebSocketPayload.fromMatchResult(matchStatus, matchRoomId);
         sendWebNotification(userId, payload);
 
+        // 이메일 알림
+        sendEmailNotification(userId, matchStatus);
+    }
+
+    private void sendWebNotification(Long userId, WebSocketPayload payload) {
+        simpMessagingTemplate.convertAndSendToUser(
+                String.valueOf(userId),
+                "/queue/notify",
+                payload
+        );
+    }
+
+    private void sendEmailNotification(Long userId, MatchStatus matchStatus) {
         Optional<String> toEmail = userRepository.findEmailByUserId(userId);
         if (toEmail.isEmpty()) {
             log.error("[sendMatchResult] userId={} 의 이메일 존재하지 않음", userId);
-            return;
+            throw new CriticalDataException(ErrorCode.NOT_FOUND_EMAIL.getMessage(), List.of(userId));
         }
 
-        String subject = "매칭 결과 알림입니다.";
-        String content = MatchStatus.getMessage(matchStatus) + "\n페이지에 접속해주세요!";
-        emailNotifier.sendAsync(toEmail.get(), subject, content);
+        TemplatedEmailRequest emailRequest = TemplatedEmailRequest.builder()
+                .toEmail(toEmail.get())
+                .awsSesTemplateType(AwsSesTemplateType.MATCH_RESULT)
+                .templateData(Map.of(
+                        "matchResult", MatchStatus.getMessage(matchStatus)))
+                .build();
+
+        emailNotifier.sendTemplatedEmail(emailRequest);
     }
 
     @Async("appointmentNotificationExecutor")
@@ -102,13 +124,5 @@ public class NotificationService {
     public void sendChatNotification(Long receiverUserId, Long matchRoomId, Long senderId) {
         WebSocketPayload payload = WebSocketPayload.fromMatchChat(matchRoomId, senderId);
         sendWebNotification(receiverUserId, payload);
-    }
-
-    private void sendWebNotification(Long userId, WebSocketPayload payload) {
-        simpMessagingTemplate.convertAndSendToUser(
-                String.valueOf(userId),
-                "/queue/notify",
-                payload
-        );
     }
 }
